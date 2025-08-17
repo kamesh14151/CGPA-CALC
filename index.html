@@ -79,11 +79,15 @@
         select, input { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid transparent; font-size: 16px; background: rgba(255, 255, 255, 0.9); color: #2c3e50; transition: all 0.3s ease; }
         select:focus, input:focus { outline: none; box-shadow: 0 0 0 3px var(--secondary); }
         
+        button.reset-btn {
+            background: linear-gradient(45deg, var(--danger), var(--warning));
+            padding: 10px 20px; font-size: 0.9rem;
+        }
+        
         .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-secondary); }
         .footer p { margin: 5px 0; }
         .footer .brand-main { font-weight: 600; color: var(--text-primary); }
         
-        /* --- RESPONSIVE STYLES --- */
         @media (max-width: 1024px) {
             .dashboard-layout { grid-template-columns: 1fr; }
             .container { padding: 20px; margin: 20px; }
@@ -167,6 +171,7 @@
         <footer class="footer">
             <p><span class="brand-main">AJ STUDIOS</span></p>
             <p>Powered by AJ COMPANY</p>
+            <button class="reset-btn" onclick="resetCalculator()" style="margin-top: 15px;"><i class="fas fa-redo"></i> Reset Calculator</button>
         </footer>
     </div>
     
@@ -188,7 +193,6 @@
             "EXE":{"name":"Electronics & Computer","color":"var(--exe-color)","icon":"fas fa-desktop","semesters":{"1":[{"code":"U23EX101","name":"Basic Electronics","credits":4},{"code":"U23EX102","name":"Programming Fundamentals","credits":4},{"code":"U23EX103","name":"Digital Logic Design","credits":3},{"code":"U23EX104","name":"Engineering Mathematics","credits":3},{"code":"U23EX105","name":"Communication Skills","credits":2},{"code":"U23EX106","name":"Electronics Lab","credits":1},{"code":"U23EX107","name":"Programming Lab","credits":1}],"2":[{"code":"U23EX201","name":"Data Structures","credits":4},{"code":"U23EX202","name":"Analog Electronics","credits":4},{"code":"U23EX203","name":"Computer Organization","credits":4},{"code":"U23EX204","name":"Signals and Systems","credits":3},{"code":"U23EX205","name":"Database Systems","credits":3},{"code":"U23EX206","name":"Analog Electronics Lab","credits":1},{"code":"U23EX207","name":"Data Structures Lab","credits":1}]}}}
     };
 
-    // --- App Initialisation & State Management ---
     const gradePoints = { "O": 10, "A+": 9, "A": 8, "B+": 7, "B": 6, "C": 5, "U": 0 };
     let currentBranch = "", currentGrades = {}, gpaPerSem = {}, gradeDistSummaryChart;
     const debounce = (func, delay) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; };
