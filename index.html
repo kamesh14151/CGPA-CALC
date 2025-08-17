@@ -4,2208 +4,448 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Engineering GPA & CGPA Calculator | AJ STUDIOS</title>
+    <!-- Custom Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #6a11cb;
-            --primary-dark: #4d0b9c;
-            --secondary: #2575fc;
-            --secondary-dark: #1a5fd3;
-            --success: #00b09b;
-            --danger: #ff416c;
-            --warning: #ffb347;
-            --dark: #1a1a2e;
-            --light: #f8f9fa;
-            --card-bg: rgba(255, 255, 255, 0.08);
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.8);
-            
-            /* Branch colors */
-            --cse-color: #4ECDC4;
-            --it-color: #45B7D1;
-            --ece-color: #A18CD1;
-            --eee-color: #FFA07A;
-            --mech-color: #FF6B6B;
-            --civil-color: #A1D1A1;
-            --bme-color: #FFB347;
-            --ft-color: #FF85A2;
-            --mct-color: #8A2BE2;
-            --aiml-color: #00CED1;
-            --csd-color: #9370DB;
-            --ads-color: #20B2AA;
-            --efe-color: #6495ED;
-            --exe-color: #4682B4;
+            --primary: #6a11cb; --secondary: #2575fc; --success: #00b09b; --danger: #ff416c;
+            --warning: #ffb347; --info: #3498db; --light: #f8f9fa; --dark: #100721;
+            --text-primary: #ffffff; --text-secondary: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.08); --border-color: rgba(255, 255, 255, 0.15);
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --cse-color: #4ECDC4; --it-color: #45B7D1; --ece-color: #A18CD1; --eee-color: #FFA07A; --mech-color: #FF6B6B;
+            --civil-color: #A1D1A1; --bme-color: #FFB347; --ft-color: #FF85A2; --mct-color: #8A2BE2; --aiml-color: #00CED1;
+            --csd-color: #9370DB; --ads-color: #20B2AA; --efe-color: #6495ED; --exe-color: #4682B4;
         }
-
-        /* Dark mode variables */
-        .dark-mode {
-            --primary: #8a2be2;
-            --primary-dark: #6a11cb;
-            --secondary: #4169e1;
-            --secondary-dark: #1a5fd3;
-            --dark: #121212;
-            --light: #f8f9fa;
-            --card-bg: rgba(30, 30, 30, 0.5);
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.8);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        @keyframes background-pan { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes stagger-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* --- NEW: Continuous Shimmer Animation --- */
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
         }
 
         body {
-            font-family: "Poppins", sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: var(--text-primary);
-            min-height: 100vh;
-            line-height: 1.6;
-            background-attachment: fixed;
-            transition: all 0.3s ease;
-        }
-
-        h1, h2, h3 {
-            font-weight: 600;
-            margin: 10px 0;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(90deg, #fff, #c9d6ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 5px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            color: var(--text-secondary);
-            position: relative;
-            display: inline-block;
-        }
-
-        h2::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 3px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .container:hover {
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            transform: translateY(-2px);
-        }
-
-        /* Header with logo */
-        .header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 30px;
-            gap: 15px;
-            text-align: center;
-        }
-
-        .logo-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .logo {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .logo:hover {
-            transform: rotate(10deg) scale(1.05);
-        }
-
-        .logo i {
-            font-size: 2rem;
-            color: white;
-        }
-
-        .brand-name {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-top: 5px;
-        }
-
-        .brand-tagline {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 5px;
-        }
-
-        /* Branch selection */
-        .branch-selection {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 25px 0;
-        }
-
-        .branch-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-left: 5px solid var(--primary);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .branch-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.1));
-            z-index: -1;
-        }
-
-        .branch-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .branch-card.selected {
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
-        }
-
-        .branch-icon {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .branch-name {
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 5px;
-        }
-
-        .branch-code {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        /* Form elements */
-        .form-group {
-            margin-bottom: 25px;
-            position: relative;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            font-size: 1rem;
-        }
-
-        select, input {
-            width: 100%;
-            padding: 14px 18px;
-            border-radius: 12px;
-            border: none;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #2c3e50;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            appearance: none;
-            -webkit-appearance: none;
-        }
-
-        select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%232c3e50' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 12px;
-        }
-
-        select:focus, input:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.3);
-            transform: translateY(-2px);
-        }
-
-        button {
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            color: white;
-            font-weight: 600;
-            padding: 14px 28px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            font-size: 16px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            letter-spacing: 0.5px;
-        }
-
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-            background: linear-gradient(45deg, var(--primary-dark), var(--secondary-dark));
-        }
-
-        button:active {
-            transform: translateY(1px);
-        }
-
-        /* Subject cards */
-        .subject-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-            margin: 25px 0;
-        }
-
-        .subject-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-            border-left: 5px solid var(--primary);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .subject-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.1));
-            z-index: -1;
-        }
-
-        .subject-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .subject-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .subject-code {
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            letter-spacing: 0.5px;
-        }
-
-        .subject-credits {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: white;
-        }
-
-        .subject-name {
-            margin: 12px 0;
-            font-size: 1.1rem;
-            line-height: 1.5;
-            color: var(--text-primary);
-            min-height: 60px;
-        }
-
-        .subject-grade {
-            margin-top: 15px;
-        }
-
-        .subject-grade select {
-            width: 100%;
-            padding: 10px 15px;
-            font-size: 1rem;
-            border-radius: 10px;
-        }
-
-        /* Result cards */
-        .result-card {
-            margin: 30px 0;
-            padding: 25px;
-            border-radius: 18px;
-            text-align: center;
-            font-size: 1.6rem;
-            font-weight: 600;
-            transition: all 0.5s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 120px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .result-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            z-index: -1;
-        }
-
-        .gpa-result {
-            background: linear-gradient(135deg, rgba(106, 17, 203, 0.8), rgba(37, 117, 252, 0.8));
-        }
-
-        .cgpa-result {
-            background: linear-gradient(135deg, rgba(0, 176, 155, 0.8), rgba(150, 201, 61, 0.8));
-        }
-
-        .fail {
-            background: linear-gradient(135deg, rgba(255, 65, 108, 0.8), rgba(255, 75, 43, 0.8));
-            animation: pulse 1.5s infinite;
-        }
-
-        .high {
-            background: linear-gradient(135deg, rgba(0, 255, 153, 0.8), rgba(0, 204, 255, 0.8));
-            box-shadow: 0 0 25px rgba(0, 255, 153, 0.6), 0 0 35px rgba(0, 204, 255, 0.6);
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 65, 108, 0.4); }
-            70% { box-shadow: 0 0 0 20px rgba(255, 65, 108, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 65, 108, 0); }
-        }
-
-        .result-value {
-            font-size: 3rem;
-            font-weight: 700;
-            margin: 15px 0;
-            background: linear-gradient(90deg, #fff, #c9d6ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .result-label {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 5px;
-        }
-
-        /* Progress bar */
-        .progress-container {
-            width: 80%;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            margin: 15px 0;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, 
-                var(--primary), 
-                var(--secondary), 
-                var(--success));
-            border-radius: 5px;
-            transition: width 0.5s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            background-size: 200% 100%;
-            animation: gradient 2s ease infinite;
-        }
-
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Arrears section */
-        .arrears-container {
-            margin-top: 30px;
-            background: linear-gradient(135deg, rgba(255, 65, 108, 0.2), rgba(255, 75, 43, 0.2));
-            padding: 20px;
-            border-radius: 18px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            transition: all 0.5s ease;
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            border: 1px solid rgba(255, 65, 108, 0.3);
-        }
-
-        .arrears-container.show {
-            max-height: 500px;
-            opacity: 1;
-            padding: 25px;
-        }
-
-        .arrears-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            margin-bottom: 15px;
-        }
-
-        .arrears-header h3 {
-            margin: 0;
-            color: #ffcccb;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.3rem;
-        }
-
-        .arrears-list {
-            list-style-type: none;
-        }
-
-        .arrears-list li {
-            padding: 12px;
-            margin-bottom: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border-left: 3px solid #ff416c;
-        }
-
-        .arrears-list li:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateX(5px);
-        }
-
-        .arrears-list li::before {
-            content: "⚠️";
-            margin-right: 12px;
-            font-size: 1.2rem;
-        }
-
-        /* CGPA section */
-        .cgpa-section {
-            margin-top: 40px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .semester-inputs {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .semester-input {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 18px;
-            border-radius: 15px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .semester-input label {
-            font-size: 1rem;
-            margin-bottom: 8px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .semester-input .auto-fetch {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            font-size: 0.85rem;
-            color: #4CAF50;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(76, 175, 80, 0.1);
-            padding: 3px 8px;
-            border-radius: 20px;
-        }
-
-        .semester-input .auto-fetch i {
-            font-size: 0.9rem;
-        }
-
-        /* Grade colors */
-        .grade-O { border-left-color: #4CAF50 !important; }
-        .grade-Aplus { border-left-color: #8BC34A !important; }
-        .grade-A { border-left-color: #CDDC39 !important; }
-        .grade-Bplus { border-left-color: #FFC107 !important; }
-        .grade-B { border-left-color: #FF9800 !important; }
-        .grade-C { border-left-color: #FF5722 !important; }
-        .grade-U { border-left-color: #F44336 !important; }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
-        }
-
-        .footer a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .footer a:hover {
-            color: var(--secondary);
-            text-decoration: underline;
-        }
-
-        /* Floating action buttons */
-        .fab-container {
-            position: fixed;
-            bottom: 40px;
-            right: 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 100;
-        }
-
-        .fab {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-        }
-
-        .fab:hover {
-            transform: scale(1.1) translateY(-5px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-            background: linear-gradient(45deg, var(--primary-dark), var(--secondary-dark));
-        }
-
-        .fab-secondary {
-            width: 60px;
-            height: 60px;
+            font-family: "Poppins", sans-serif; background: linear-gradient(135deg, var(--dark), #1a1a2e);
+            color: var(--text-primary); min-height: 100vh; line-height: 1.6; background-attachment: fixed;
+        }
+        .aurora-background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(ellipse at 10% 10%, var(--primary) 0%, rgba(106, 17, 203, 0) 40%), radial-gradient(ellipse at 90% 85%, var(--secondary) 0%, rgba(37, 117, 252, 0) 35%); animation: background-pan 30s linear infinite; opacity: 0.3; }
+        .container { max-width: 1400px; margin: 30px auto; background: rgba(16, 7, 33, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px var(--shadow-color); border: 1px solid var(--border-color); }
+        .header { text-align: center; margin-bottom: 20px; }
+        .logo { width: 60px; height: 60px; background: linear-gradient(45deg, var(--primary), var(--secondary)); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px var(--shadow-color); margin-bottom: 10px; }
+        .logo i { font-size: 1.8rem; color: white; }
+        
+        .animated-brand {
             font-size: 1.5rem;
-            background: linear-gradient(45deg, var(--success), var(--warning));
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            background: linear-gradient(120deg, var(--primary) 20%, var(--secondary) 40%, var(--light) 50%, var(--secondary) 60%, var(--primary) 80%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
         }
+        
+        h1 { font-size: 2.2rem; background: linear-gradient(90deg, #fff, #c9d6ff); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 3px 6px var(--shadow-color); }
+        
+        .summary-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .summary-card { background: var(--card-bg); border-radius: 15px; padding: 20px; text-align: center; border-left: 5px solid var(--info); }
+        .summary-card .icon { font-size: 1.8rem; margin-bottom: 10px; }
+        .summary-card .value { font-size: 2rem; font-weight: 700; }
+        .summary-card .label { font-size: 0.9rem; color: var(--text-secondary); }
+        #summary-cgpa { border-color: var(--success); } #summary-arrears { border-color: var(--danger); }
+        .mini-chart-container { min-height: 150px; position: relative; }
 
-        .fab-container:hover .fab-secondary {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .dashboard-layout { display: grid; grid-template-columns: 350px 1fr; gap: 30px; }
+        .left-panel { display: flex; flex-direction: column; gap: 20px; }
+        
+        .form-group { background: var(--card-bg); padding: 20px; border-radius: 15px; }
+        .arrears-section { background: rgba(255, 65, 108, 0.1); padding: 20px; border-radius: 15px; border: 1px solid var(--danger); }
+        .arrears-section h3 { font-size: 1.2rem; margin-bottom: 10px; color: var(--danger); }
+        .arrears-list { list-style: none; padding-left: 0; }
+        .arrears-list li { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; margin-bottom: 5px; font-size: 0.9rem; }
 
-        /* Confetti effect */
-        .confetti-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999;
-            overflow: hidden;
-        }
+        .branch-selection { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .branch-card { cursor: pointer; border: 2px solid transparent; background: rgba(255,255,255,0.05); text-align: center; padding: 15px 10px; border-radius: 10px; transition: all 0.3s ease; }
+        .branch-card:hover { background: rgba(255,255,255,0.1); }
+        .branch-card.selected { border-color: var(--secondary); background: rgba(37, 117, 252, 0.2); }
+        .branch-card i { font-size: 1.5rem; }
+        .branch-card .branch-name { font-size: 0.85rem; margin-top: 8px; font-weight: 500; }
+        
+        .subject-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .subject-card { background: var(--card-bg); border-radius: 15px; padding: 15px; transition: all 0.3s ease; animation: stagger-in 0.5s ease both; }
+        
+        .empty-state { text-align: center; padding: 40px; background: var(--card-bg); border-radius: 15px; margin-top: 20px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .empty-state i { font-size: 3rem; color: var(--secondary); margin-bottom: 15px; }
 
-        .confetti {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            opacity: 0;
-            animation: confetti-fall 5s ease-in-out;
-        }
-
-        @keyframes confetti-fall {
-            0% {
-                transform: translateY(-10vh) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(110vh) rotate(720deg);
-                opacity: 0;
-            }
-        }
-
-        /* Loading spinner */
-        .loading-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: var(--secondary);
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Help section */
-        .help-section {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            margin: 15px 0;
-        }
-
-        .help-section.show {
-            max-height: 500px;
-            padding: 20px;
-            margin: 15px 0;
-        }
-
-        .help-toggle {
-            cursor: pointer;
-            color: var(--secondary);
-            text-align: center;
-            margin: 10px 0;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        /* Theme toggle */
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-
-        .theme-toggle:hover {
-            transform: scale(1.1);
-            background: rgba(255,255,255,0.2);
-        }
-
-        /* Tooltip */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-            cursor: help;
-        }
-
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 200px;
-            background-color: rgba(0,0,0,0.8);
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 10px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.9rem;
-            font-weight: normal;
-            backdrop-filter: blur(5px);
-        }
-
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* Export buttons */
-        .export-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .export-btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .export-pdf {
-            background: linear-gradient(45deg, #ff416c, #ff4b2b);
-            color: white;
-        }
-
-        .export-csv {
-            background: linear-gradient(45deg, #00b09b, #96c93d);
-            color: white;
-        }
-
-        .export-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 992px) {
-            .container {
-                padding: 25px;
-                margin: 20px;
-            }
-            
-            h1 {
-                font-size: 2.2rem;
-            }
-            
-            h2 {
-                font-size: 1.6rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                margin: 15px;
-                border-radius: 15px;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            h2 {
-                font-size: 1.4rem;
-            }
-            
-            .subject-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .semester-inputs {
-                grid-template-columns: 1fr;
-            }
-            
-            .branch-selection {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-            
-            .logo {
-                width: 60px;
-                height: 60px;
-            }
-            
-            .fab {
-                width: 60px;
-                height: 60px;
-                font-size: 1.5rem;
-                bottom: 30px;
-                right: 30px;
-            }
-            
-            .fab-container {
-                bottom: 30px;
-                right: 30px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 15px;
-                margin: 10px;
-            }
-            
-            h1 {
-                font-size: 1.6rem;
-            }
-            
-            h2 {
-                font-size: 1.2rem;
-            }
-            
-            .result-value {
-                font-size: 2.5rem;
-            }
-            
-            .subject-card {
-                padding: 15px;
-            }
-            
-            .subject-name {
-                font-size: 1rem;
-            }
-            
-            .branch-selection {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .branch-name {
-                font-size: 1rem;
-            }
-            
-            .export-buttons {
-                flex-direction: column;
-            }
+        #gpaResult { background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 15px; padding: 25px; text-align: center; }
+        
+        select, input { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid transparent; font-size: 16px; background: rgba(255, 255, 255, 0.9); color: #2c3e50; transition: all 0.3s ease; }
+        select:focus, input:focus { outline: none; box-shadow: 0 0 0 3px var(--secondary); }
+        
+        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-secondary); }
+        .footer p { margin: 5px 0; }
+        .footer .brand-main { font-weight: 600; color: var(--text-primary); }
+        
+        @media (max-width: 1024px) {
+            .dashboard-layout { grid-template-columns: 1fr; }
+            .header, .container { padding: 15px; }
+            h1 { font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
-    <div class="loading-container" id="loadingSpinner">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <div class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">
+    <div class="aurora-background"></div>
+    <div id="themeToggle" title="Toggle Dark Mode" style="position: fixed; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;">
         <i class="fas fa-moon"></i>
     </div>
 
     <div class="container">
-        <div class="header">
-            <div class="logo-container">
-                <div class="logo">
-                    <i class="fas fa-calculator"></i>
-                </div>
-                <div class="brand-name">AJ STUDIOS</div>
-                <div class="brand-tagline">Precision in Academic Calculation</div>
-            </div>
-            <h1 id="mainTitle"> GPA & CGPA Calculator </h1>
-            <h2>By AJ STUDIOS</h2>
-        </div>
+        <header class="header">
+            <div class="logo"><i class="fas fa-calculator"></i></div>
+            <p class="animated-brand">AJ STUDIOS</p>
+            <h1>GPA & CGPA Calculator</h1>
+        </header>
 
-        <div class="help-toggle" onclick="toggleHelp()">
-            <i class="fas fa-question-circle"></i> Need Help?
-        </div>
+        <section class="summary-dashboard">
+            <div class="summary-card" id="summary-cgpa">
+                <div class="icon"><i class="fas fa-chart-line"></i></div>
+                <div class="value" id="summaryCgpaValue">0.00</div>
+                <div class="label">Overall CGPA</div>
+            </div>
+            <div class="summary-card" id="summary-credits">
+                <div class="icon"><i class="fas fa-star"></i></div>
+                <div class="value" id="summaryCreditsValue">0</div>
+                <div class="label">Total Credits</div>
+            </div>
+            <div class="summary-card" id="summary-arrears">
+                <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="value" id="summaryArrearsValue">0</div>
+                <div class="label">Arrears</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">Grade Distribution</div>
+                <div class="mini-chart-container">
+                    <canvas id="gradeDistSummaryChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <main class="dashboard-layout">
+            <aside class="left-panel">
+                <div class="form-group">
+                    <label for="branchSelection"><i class="fas fa-university"></i> Branch</label>
+                    <div class="branch-selection" id="branchSelection"></div>
+                </div>
+                <div class="form-group" id="semesterGroup" style="display: none;">
+                    <label for="semester"><i class="fas fa-graduation-cap"></i> Semester</label>
+                    <select id="semester"></select>
+                </div>
+                <div id="arrearsSection" class="arrears-section" style="display: none;">
+                    <h3><i class="fas fa-flag"></i> Arrear Subjects</h3>
+                    <ul id="arrearsList" class="arrears-list"></ul>
+                </div>
+            </aside>
+            <section class="right-panel">
+                <div id="subjectForm">
+                    <div class="empty-state">
+                        <i class="fas fa-hand-pointer"></i>
+                        <p>Please select your branch to get started.</p>
+                    </div>
+                </div>
+                <div id="gpaResult" style="display: none; margin-top: 20px;"></div>
+            </section>
+        </main>
         
-        <div class="help-section" id="helpSection">
-            <h3>How to use this calculator</h3>
-            <ol>
-                <li>Select your branch from the available options</li>
-                <li>Choose your current semester</li>
-                <li>Enter your grades for each subject</li>
-                <li>View your GPA and CGPA results</li>
-                <li>For CGPA, you can manually edit semester GPAs if needed</li>
-            </ol>
-            <h3>Grade Points</h3>
-            <ul>
-                <li>O = 10 points</li>
-                <li>A+ = 9 points</li>
-                <li>A = 8 points</li>
-                <li>B+ = 7 points</li>
-                <li>B = 6 points</li>
-                <li>C = 5 points</li>
-                <li>U = 0 points (Fail)</li>
-            </ul>
-            <div class="export-buttons">
-                <div class="export-btn export-pdf" onclick="exportToPDF()">
-                    <i class="fas fa-file-pdf"></i> Export as PDF
-                </div>
-                <div class="export-btn export-csv" onclick="exportToCSV()">
-                    <i class="fas fa-file-csv"></i> Export as CSV
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label><i class="fas fa-university"></i> Select Your Branch</label>
-            <div class="branch-selection" id="branchSelection">
-                <!-- Branches will be added dynamically -->
-            </div>
-        </div>
-
-        <div class="form-group" id="semesterGroup" style="display: none;">
-            <label for="semester"><i class="fas fa-graduation-cap"></i> Select Semester</label>
-            <select id="semester" onchange="loadSubjects()">
-                <option value="">-- Select Semester --</option>
-                <option value="1">Semester 1</option>
-                <option value="2">Semester 2</option>
-                <option value="3">Semester 3</option>
-                <option value="4">Semester 4</option>
-                <option value="5">Semester 5</option>
-                <option value="6">Semester 6</option>
-                <option value="7">Semester 7</option>
-                <option value="8">Semester 8</option>
-            </select>
-        </div>
-
-        <div id="subjectForm"></div>
-
-        <div id="gpaResult" class="result-card gpa-result" style="display: none;">
-            <div class="result-label">Semester GPA</div>
-            <div class="result-value" id="gpaValue">0.00</div>
-            <div class="progress-container">
-                <div class="progress-bar" id="gpaProgress"></div>
-            </div>
-        </div>
-
-        <div id="arrears" class="arrears-container">
-            <div class="arrears-header" onclick="toggleArrears()">
-                <h3><i class="fas fa-exclamation-triangle"></i> Arrear Subjects</h3>
-                <i class="fas fa-chevron-down"></i>
-            </div>
-            <ul class="arrears-list" id="arrearsList"></ul>
-        </div>
-
-        <div class="cgpa-section">
-            <h2><i class="fas fa-chart-line"></i> CGPA Calculator</h2>
-            
-            <div id="cgpaContainer" class="semester-inputs"></div>
-            
-            <div id="cgpaResult" class="result-card cgpa-result">
-                <div class="result-label">Overall CGPA</div>
-                <div class="result-value" id="cgpaValue">0.00</div>
-                <div class="progress-container">
-                    <div class="progress-bar" id="cgpaProgress"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>© 2025 AJ COMPANY </p>
-            <p>Designed with <i class="fas fa-heart" style="color: #ff416c;"></i> AJ STUDIOS for Sona College Students</p>
-        </div>
+        <footer class="footer">
+            <p><span class="brand-main">AJ STUDIOS</span></p>
+            <p>Powered by AJ COMPANY</p>
+        </footer>
     </div>
-
-    <div class="fab-container">
-        <button class="fab fab-secondary" onclick="exportToPDF()" title="Export to PDF">
-            <i class="fas fa-file-pdf"></i>
-        </button>
-        <button class="fab fab-secondary" onclick="exportToCSV()" title="Export to CSV">
-            <i class="fas fa-file-csv"></i>
-        </button>
-        <button class="fab" onclick="resetCalculator()" title="Reset Calculator">
-            <i class="fas fa-redo"></i>
-        </button>
-    </div>
-
+    
     <script>
-        // Academic data structure with all branches from Sona College
-        const academicData = {
-            branches: {
-                "CSE": {
-                    name: "Computer Science and Engineering",
-                    color: "var(--cse-color)",
-                    icon: "fas fa-laptop-code",
-                    semesters: {
-                        1: [
-                            {code:"U23ENG101A", name:"Communication Skills in English", credits:3},
-                            {code:"U23MAT102A", name:"Linear Algebra and Calculus With MATLAB", credits:4},
-                            {code:"U23PHY103B", name:"Engineering Physics", credits:3},
-                            {code:"U23PPR105", name:"Problem Solving using Python Programming", credits:3},
-                            {code:"U23BEE106A", name:"Basic Electrical and Electronics Engineering", credits:3},
-                            {code:"U23TAM101", name:"Heritage of Tamils", credits:1},
-                            {code:"U23PHL110", name:"Engineering Physics Lab", credits:1},
-                            {code:"U23BEEL113", name:"Basic Electrical and Electronics Engineering Lab", credits:1},
-                            {code:"U23PPL112", name:"Python Programming Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23ENG201A", name:"Technical English", credits:2},
-                            {code:"U23MAT202B", name:"Discrete Mathematics", credits:4},
-                            {code:"U23CHE204B", name:"Chemistry For Computer Science    ", credits:3},
-                            {code:"U23CPR205B", name:"Programming In C", credits:3},
-                            {code:"U23EGR207", name:"Engineering Graphics", credits:3},
-                            {code:"U23EC203", name:"Digital Principles And System Design", credits:3},
-                            {code:"U23CHL211", name:"Chemistry Lab", credits:1},
-                            {code:"U23CPL212", name:"C programming Lab", credits:1},
-                            {code:"U23TAM201", name:"Tamils And Technology", credits:1}
-                        ],
-                        3: [
-                            {code:"U23MAT301D", name:"Probability and Statistics", credits:4},
-                            {code:"U23CS301", name:"Data Structures", credits:3},
-                            {code:"U23CS302", name:"Computer Architecture", credits:3},
-                            {code:"U23CS303", name:"Object Oriented Programming", credits:3},
-                            {code:"U23CS304", name:"Operating Systems", credits:3},
-                            {code:"U23CS305", name:"Computer Information and Ethics", credits:3},
-                            {code:"U23CS306", name:"Data Structures Lab", credits:1},
-                            {code:"U23CS307", name:"Object Oriented Programming Lab", credits:1},
-                            {code:"U23GE301", name:"Soft Skills and Aptitude-I", credits:1},
-                            {code:"Noc24-mg72", name:"NPTEL:design Thinking-A Primer", credits:1}
-                        ],
-                        4: [
-                            {code:"U23MAT401B", name:"Numerical Methods", credits:4},
-                            {code:"U23CS401", name:"Design And Analysis of Algorithms", credits:3},
-                            {code:"U23CS402", name:"Software Engineering", credits:3},
-                            {code:"U23CS403", name:"DataBase Management Systems", credits:3},
-                            {code:"U23CS404", name:"Embedded System Design ", credits:3},
-                            {code:"U23CS405", name:"Software Development Lab", credits:1},
-                            {code:"U23CS403", name:"Database Management Systems Lab", credits:1}
-                        ],
-                         5: [
-                            {code:"U23CS504", name:"Machine Learning", credits:3},
-                            {code:"U23CS501", name:"Computer Networks", credits:3},
-                            {code:"U23CS502", name:"Artificial Intelligence", credits:3},
-                            {code:"U23CS503", name:"Theory of Computation", credits:3},
-                            {code:"noc25-cs135", name:"Elective NPTEL", credits:3},
-                            {code:" U23CS947 / U23CS903", name:"Professional Elective ", credits:3},
-                            {code:"U23CS505", name:"Computer Networks Laboratory", credits:2},
-                            {code:"U23CS506", name:"Artificial Intelligence and Machine Learning Laboratory", credits:1},
-                            {code:"U23GE501", name:"Soft Skills and Aptitude -III", credits:1}
-                        ],     // Continue for all 8 semesters
-                    }
-                },
-                "IT": {
-                    name: "Information Technology",
-                    color: "var(--it-color)",
-                    icon: "fas fa-network-wired",
-                    semesters: {
-                        1: [
-                            {code:"U23IT101", name:"Programming Fundamentals", credits:4},
-                            {code:"U23IT102", name:"Discrete Mathematics", credits:4},
-                            {code:"U23IT103", name:"Digital Systems", credits:3},
-                            {code:"U23IT104", name:"Computer Organization", credits:3},
-                            {code:"U23IT105", name:"Communication Skills", credits:2},
-                            {code:"U23IT106", name:"Programming Lab", credits:1},
-                            {code:"U23IT107", name:"Digital Systems Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23IT201", name:"Data Structures", credits:4},
-                            {code:"U23IT202", name:"Database Systems", credits:4},
-                            {code:"U23IT203", name:"Operating Systems", credits:3},
-                            {code:"U23IT204", name:"Computer Networks", credits:3},
-                            {code:"U23IT205", name:"Web Technologies", credits:3},
-                            {code:"U23IT206", name:"Data Structures Lab", credits:1},
-                            {code:"U23IT207", name:"Web Technologies Lab", credits:1}
-                        ],
-                        // Continue for all 8 semesters
-                    }
-                },
-                "ECE": {
-                    name: "Electronics and Communication Engineering",
-                    color: "var(--ece-color)",
-                    icon: "fas fa-satellite-dish",
-                    semesters: {
-                        1: [
-                            {code:"U23EC101", name:"Basic Electronics", credits:4},
-                            {code:"U23EC102", name:"Circuit Theory", credits:4},
-                            {code:"U23EC103", name:"Engineering Mathematics", credits:4},
-                            {code:"U23EC104", name:"Programming in C", credits:3},
-                            {code:"U23EC105", name:"Communication Skills", credits:2},
-                            {code:"U23EC106", name:"Electronics Lab", credits:1},
-                            {code:"U23EC107", name:"Programming Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23EC201", name:"Analog Electronics", credits:4},
-                            {code:"U23EC202", name:"Digital Electronics", credits:4},
-                            {code:"U23EC203", name:"Signals and Systems", credits:4},
-                            {code:"U23EC204", name:"Electromagnetic Theory", credits:3},
-                            {code:"U23EC205", name:"Data Structures", credits:3},
-                            {code:"U23EC206", name:"Analog Electronics Lab", credits:1},
-                            {code:"U23EC207", name:"Digital Electronics Lab", credits:1}
-                        ],
-                        // Continue for all 8 semesters
-                    }
-                },
-                "EEE": {
-                    name: "Electrical and Electronics Engineering",
-                    color: "var(--eee-color)",
-                    icon: "fas fa-bolt",
-                    semesters: {
-                        1: [
-                            {code:"U23EE101", name:"Basic Electrical Engineering", credits:4},
-                            {code:"U23EE102", name:"Engineering Mathematics", credits:4},
-                            {code:"U23EE103", name:"Electronics Engineering", credits:3},
-                            {code:"U23EE104", name:"Programming in C", credits:3},
-                            {code:"U23EE105", name:"Communication Skills", credits:2},
-                            {code:"U23EE106", name:"Electrical Lab", credits:1},
-                            {code:"U23EE107", name:"Programming Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23EE201", name:"Circuit Theory", credits:4},
-                            {code:"U23EE202", name:"Electromagnetic Theory", credits:4},
-                            {code:"U23EE203", name:"Digital Electronics", credits:4},
-                            {code:"U23EE204", name:"Electrical Machines", credits:3},
-                            {code:"U23EE205", name:"Data Structures", credits:3},
-                            {code:"U23EE206", name:"Circuit Theory Lab", credits:1},
-                            {code:"U23EE207", name:"Digital Electronics Lab", credits:1}
-                        ],
-                        // Continue for all 8 semesters
-                    }
-                },
-                "MECH": {
-                    name: "Mechanical Engineering",
-                    color: "var(--mech-color)",
-                    icon: "fas fa-cogs",
-                    semesters: {
-                        1: [
-                            {code:"U23ME101", name:"Engineering Mechanics", credits:4},
-                            {code:"U23ME102", name:"Engineering Graphics", credits:4},
-                            {code:"U23ME103", name:"Engineering Mathematics", credits:4},
-                            {code:"U23ME104", name:"Basic Electrical Engineering", credits:3},
-                            {code:"U23ME105", name:"Communication Skills", credits:2},
-                            {code:"U23ME106", name:"Workshop Practice", credits:1},
-                            {code:"U23ME107", name:"Engineering Graphics Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23ME201", name:"Thermodynamics", credits:4},
-                            {code:"U23ME202", name:"Mechanics of Materials", credits:4},
-                            {code:"U23ME203", name:"Manufacturing Technology", credits:4},
-                            {code:"U23ME204", name:"Fluid Mechanics", credits:3},
-                            {code:"U23ME205", name:"Computer Programming", credits:3},
-                            {code:"U23ME206", name:"Thermodynamics Lab", credits:1},
-                            {code:"U23ME207", name:"Manufacturing Technology Lab", credits:1}
-                        ],
-                        // Continue for all 8 semesters
-                    }
-                },
-                "CIVIL": {
-                    name: "Civil Engineering",
-                    color: "var(--civil-color)",
-                    icon: "fas fa-building",
-                    semesters: {
-                        1: [
-                            {code:"U23CE101", name:"Engineering Mechanics", credits:4},
-                            {code:"U23CE102", name:"Engineering Graphics", credits:4},
-                            {code:"U23CE103", name:"Engineering Mathematics", credits:4},
-                            {code:"U23CE104", name:"Basic Civil Engineering", credits:3},
-                            {code:"U23CE105", name:"Communication Skills", credits:2},
-                            {code:"U23CE106", name:"Surveying", credits:1},
-                            {code:"U23CE107", name:"Engineering Graphics Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23CE201", name:"Building Materials", credits:4},
-                            {code:"U23CE202", name:"Structural Analysis", credits:4},
-                            {code:"U23CE203", name:"Fluid Mechanics", credits:4},
-                            {code:"U23CE204", name:"Surveying", credits:3},
-                            {code:"U23CE205", name:"Computer Programming", credits:3},
-                            {code:"U23CE206", name:"Building Materials Lab", credits:1},
-                            {code:"U23CE207", name:"Surveying Lab", credits:1}
-                        ],
-                        // Continue for all 8 semesters
-                    }
-                },
-                "BME": {
-                    name: "Bio Medical Engineering",
-                    color: "var(--bme-color)",
-                    icon: "fas fa-heartbeat",
-                    semesters: {
-                        1: [
-                            {code:"U23BM101", name:"Human Anatomy", credits:4},
-                            {code:"U23BM102", name:"Engineering Mathematics", credits:4},
-                            {code:"U23BM103", name:"Basic Electronics", credits:3},
-                            {code:"U23BM104", name:"Programming in C", credits:3},
-                            {code:"U23BM105", name:"Communication Skills", credits:2},
-                            {code:"U23BM106", name:"Human Anatomy Lab", credits:1},
-                            {code:"U23BM107", name:"Programming Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23BM201", name:"Human Physiology", credits:4},
-                            {code:"U23BM202", name:"Biochemistry", credits:4},
-                            {code:"U23BM203", name:"Medical Electronics", credits:4},
-                            {code:"U23BM204", name:"Biomechanics", credits:3},
-                            {code:"U23BM205", name:"Data Structures", credits:3},
-                            {code:"U23BM206", name:"Human Physiology Lab", credits:1},
-                            {code:"U23BM207", name:"Medical Electronics Lab", credits:1}
-                        ],
-                        // Continue for all 8 semesters
-                    }
-                },
-                "FT": {
-                    name: "Fashion Technology",
-                    color: "var(--ft-color)",
-                    icon: "fas fa-tshirt",
-                    semesters: {
-                        1: [
-                            {code:"U23FT101", name:"Fiber Science", credits:4},
-                            {code:"U23FT102", name:"Textile Chemistry", credits:4},
-                            {code:"U23FT103", name:"Fashion Illustration", credits:3},
-                            {code:"U23FT104", name:"Pattern Making", credits:3},
-                            {code:"U23FT105", name:"Communication Skills", credits:2},
-                            {code:"U23FT106", name:"Textile Chemistry Lab", credits:1},
-                            {code:"U23FT107", name:"Pattern Making Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23FT201", name:"Textile Processing", credits:4},
-                            {code:"U23FT202", name:"Apparel Manufacturing", credits:4},
-                            {code:"U23FT203", name:"Fashion Design", credits:4},
-                            {code:"U23FT204", name:"Garment Construction", credits:3},
-                            {code:"U23FT205", name:"Computer Applications", credits:3},
-                            {code:"U23FT206", name:"Apparel Manufacturing Lab", credits:1},
-                            {code:"U23FT207", name:"Garment Construction Lab", credits:1}
-                        ],
-                        // Continue for all 8 semesters
-                    }
-                },
-                "MCT": {
-                    name: "Mechatronics Engineering",
-                    color: "var(--mct-color)",
-                    icon: "fas fa-robot",
-                    semesters: {
-                        1: [
-                            {code:"U23MT101", name:"Engineering Mechanics", credits:4},
-                            {code:"U23MT102", name:"Engineering Graphics", credits:4},
-                            {code:"U23MT103", name:"Engineering Mathematics", credits:4},
-                            {code:"U23MT104", name:"Basic Electronics", credits:3},
-                            {code:"U23MT105", name:"Communication Skills", credits:2},
-                            {code:"U23MT106", name:"Workshop Practice", credits:1},
-                            {code:"U23MT107", name:"Engineering Graphics Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23MT201", name:"Thermodynamics", credits:4},
-                            {code:"U23MT202", name:"Mechanics of Materials", credits:4},
-                            {code:"U23MT203", name:"Digital Electronics", credits:4},
-                            {code:"U23MT204", name:"Fluid Mechanics", credits:3},
-                            {code:"U23MT205", name:"Computer Programming", credits:3},
-                            {code:"U23MT206", name:"Thermodynamics Lab", credits:1},
-                            {code:"U23MT207", name:"Digital Electronics Lab", credits:1}
-                        ],
-                        // Continue for all 8 semesters
-                    }
-                },
-                "AIML": {
-                    name: "Artificial Intelligence and Machine Learning",
-                    color: "var(--aiml-color)",
-                    icon: "fas fa-brain",
-                    semesters: {
-                        1: [
-                            {code:"U23EG107", name:"Engineering Graphics", credits:3},
-                            {code:"U23ENG101A", name:"Communication Skills in English", credits:3},
-                            {code:"U23MAT102A", name:"Linear Algebra and Calculus with MATLAB", credits:4},
-                            {code:"U23PPR105", name:"Problem Solving using Python Programming", credits:3},
-                            {code:"U23PHY103E", name:"Engineering Physics", credits:3},
-                            {code:"U23PHL110", name:"Engineering Physics Laboratory", credits:1},
-                            {code:"U23PPL112", name:"Python Programming Laboratory", credits:1},
-                            {code:"U23TAM101", name:"Heritage of Tamils", credits:1}
-                        ],
-                        2: [
-                            {code:"U23ENG201A", name:"Technical English", credits:2},
-                            {code:"U23MAT202D", name:"Discrete Mathematics", credits:4},
-                            {code:"U23BEEE206B", name:"Basics of Electrical and Electronics Engineering", credits:3},
-                            {code:"U23CPR205", name:"Programming in C", credits:3},
-                            {code:"U23CHE204C", name:"Applied Chemistry", credits:2},
-                            {code:"U23EC203", name:"Digital Principles and System Design", credits:3},
-                            {code:"U23CPL212", name:"C Programming Laboratory", credits:1},
-                            {code:"U23CHL211", name:"Chemistry Laboratory", credits:1},
-                            {code:"U23BEEL213B", name:"BEEE Laboratory", credits:1},
-                            {code:"U23TAM201", name:"Tamils and Technology", credits:1}  
-                        ],
-                        3: [
-                            {code:"U23MAT301E", name:"Applied Probability and Statistics-I", credits:4},
-                            {code:"U23CS301", name:"Data Structures", credits:3},
-                            {code:"U23CS302", name:"Computer Architecture", credits:3},
-                            {code:"U23CS303", name:"Object Oriented Programming Using Java", credits:3},
-                            {code:"U23AML301", name:"Data Visualization", credits:3},
-                            {code:"noc25-mg106", name:"NPTEL: Design Thinking - A Primer", credits:1},
-                            {code:"U23CS306", name:"Data Structures Laboratory", credits:1},
-                            {code:"U23CS307", name:"Object Oriented Programming Using Java Laboratory", credits:1},
-                            {code:"U23AML302", name:"Data Visualization Laboratory", credits:1},
-                            {code:"U23GE301", name:"Soft Skills and Aptitude-I", credits:1}
-                        ],
-                        4: [
-                            {code:"U23MAT401A", name:"Applied Probability and Statistics-II", credits:4},
-                            {code:"U23CS403", name:"Database Management Systems", credits:3},
-                            {code:"U23CS401", name:"Design and Analysis of Algorithms", credits:3},
-                            {code:"U23AML401", name:"Artificial Intelligence", credits:3},
-                            {code:"U23CSD402", name:"Operating Systems", credits:3},
-                            {code:"U23AML402", name:"Artificial Intelligence Lab", credits:1},
-                            {code:"U23CS405", name:"Database Management Systems Lab", credits:1},
-                            {code:"U23GE401", name:"Soft Skills and Aptitude-II", credits:1},
-                        ],
-                        5: [
-                            {code:"U23CS504", name:"Machine Learning", credits:3},
-                            {code:"U23CS501", name:"Computer Networks", credits:3},
-                            {code:"U23CSD502", name:"Software Engineering", credits:3},
-                            {code:"U23CS503", name:"Theory of Computation", credits:3},
-                            {code:"noc25-cs135", name:"Elective NPTEL", credits:3},
-                            {code:"U19CS903", name:"Professional Elective - Agile Methodologies", credits:3},
-                            {code:"U23AML501", name:"Machine Learning Laboratory", credits:2},
-                            {code:"U23CSD504", name:"Software Development Laboratory", credits:1},
-                            {code:"U23GE501", name:"Soft Skills and Aptitude -III", credits:1}
-                        ],
-                        6: [
-                            {code:"U23CS601", name:"Computer Vision", credits:3},
-                            {code:"U23CS602", name:"Reinforcement Learning", credits:3},
-                            {code:"U23CS603", name:"Robotics", credits:3},
-                            {code:"U23CS604", name:"Cyber Security", credits:3},
-                            {code:"U23CS605", name:"Blockchain Technology", credits:3},
-                            {code:"U23CS606", name:"Elective III", credits:3},
-                            {code:"U23CS607", name:"Project Work II", credits:3}
-                        ],
-                        7: [
-                            {code:"U23CS701", name:"Advanced Machine Learning", credits:3},
-                            {code:"U23CS702", name:"AI Ethics and Governance", credits:3},
-                            {code:"U23CS703", name:"Elective IV", credits:3},
-                            {code:"U23CS704", name:"Project Work III", credits:3}
-                        ],
-                        8: [
-                            {code:"U23CS801", name:"Industry Internship", credits:6},
-                            {code:"U23CS802", name:"Project Work IV", credits:6}
-                        ]
-                    }
-                },
-                "CSD": {
-                    name: "Computer Science and Design",
-                    color: "var(--csd-color)",
-                    icon: "fas fa-paint-brush",
-                    semesters: {
-                        1: [
-                            {code:"U23CD101", name:"Design Fundamentals", credits:4},
-                            {code:"U23CD102", name:"Programming Basics", credits:4},
-                            {code:"U23CD103", name:"Visual Communication", credits:3},
-                            {code:"U23CD104", name:"Mathematics for Design", credits:3},
-                            {code:"U23CD105", name:"Communication Skills", credits:2},
-                            {code:"U23CD106", name:"Design Studio", credits:1},
-                            {code:"U23CD107", name:"Programming Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23CD201", name:"User Interface Design", credits:4},
-                            {code:"U23CD202", name:"Data Structures", credits:4},
-                            {code:"U23CD203", name:"Web Design", credits:4},
-                            {code:"U23CD204", name:"Digital Illustration", credits:3},
-                            {code:"U23CD205", name:"Human-Computer Interaction", credits:3},
-                            {code:"U23CD206", name:"UI Design Lab", credits:1},
-                            {code:"U23CD207", name:"Web Design Lab", credits:1}
-                        ],
-                        // Continue for all 8 semesters
-                    }
-                },
-                "ADS": {
-                    name: "Artificial Intelligence and Data Science",
-                    color: "var(--ads-color)",
-                    icon: "fas fa-database",
-                    semesters: {
-                        1: [
-                            {code:"U23DS101", name:"Programming Fundamentals", credits:4},
-                            {code:"U23DS102", name:"Linear Algebra", credits:4},
-                            {code:"U23DS103", name:"Statistics Basics", credits:3},
-                            {code:"U23DS104", name:"Computational Thinking", credits:3},
-                            {code:"U23DS105", name:"Communication Skills", credits:2},
-                            {code:"U23DS106", name:"Programming Lab", credits:1},
-                            {code:"U23DS107", name:"Statistics Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23DS201", name:"Data Structures", credits:4},
-                            {code:"U23DS202", name:"Probability and Statistics", credits:4},
-                            {code:"U23DS203", name:"Database Systems", credits:4},
-                            {code:"U23DS204", name:"Data Visualization", credits:3},
-                            {code:"U23DS205", name:"Python Programming", credits:3},
-                            {code:"U23DS206", name:"Data Structures Lab", credits:1},
-                            {code:"U23DS207", name:"Database Lab", credits:1}
-                        ],
-                        // Continue for all 8 semesters
-                    }
-                },
-                "EFE": {
-                    name: "Electrical and Computer Engineering",
-                    color: "var(--efe-color)",
-                    icon: "fas fa-microchip",
-                    semesters: {
-                        1: [
-                            {code:"U23EF101", name:"Circuit Theory", credits:4},
-                            {code:"U23EF102", name:"Programming Fundamentals", credits:4},
-                            {code:"U23EF103", name:"Digital Electronics", credits:3},
-                            {code:"U23EF104", name:"Engineering Mathematics", credits:3},
-                            {code:"U23EF105", name:"Communication Skills", credits:2},
-                            {code:"U23EF106", name:"Circuit Theory Lab", credits:1},
-                            {code:"U23EF107", name:"Programming Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23EF201", name:"Signals and Systems", credits:4},
-                            {code:"U23EF202", name:"Data Structures", credits:4},
-                            {code:"U23EF203", name:"Analog Electronics", credits:4},
-                            {code:"U23EF204", name:"Electromagnetic Theory", credits:3},
-                            {code:"U23EF205", name:"Computer Organization", credits:3},
-                            {code:"U23EF206", name:"Analog Electronics Lab", credits:1},
-                            {code:"U23EF207", name:"Data Structures Lab", credits:1}
-                        ],
-                        // Continue for all 8 semesters
-                    }
-                },
-                "EXE": {
-                    name: "Electronics and Computer Engineering",
-                    color: "var(--exe-color)",
-                    icon: "fas fa-desktop",
-                    semesters: {
-                        1: [
-                            {code:"U23EX101", name:"Basic Electronics", credits:4},
-                            {code:"U23EX102", name:"Programming Fundamentals", credits:4},
-                            {code:"U23EX103", name:"Digital Logic Design", credits:3},
-                            {code:"U23EX104", name:"Engineering Mathematics", credits:3},
-                            {code:"U23EX105", name:"Communication Skills", credits:2},
-                            {code:"U23EX106", name:"Electronics Lab", credits:1},
-                            {code:"U23EX107", name:"Programming Lab", credits:1}
-                        ],
-                        2: [
-                            {code:"U23EX201", name:"Data Structures", credits:4},
-                            {code:"U23EX202", name:"Analog Electronics", credits:4},
-                            {code:"U23EX203", name:"Computer Organization", credits:4},
-                            {code:"U23EX204", name:"Signals and Systems", credits:3},
-                            {code:"U23EX205", name:"Database Systems", credits:3},
-                            {code:"U23EX206", name:"Analog Electronics Lab", credits:1},
-                            {code:"U23EX207", name:"Data Structures Lab", credits:1}
-                        ],
-                        // Continue for all 8 semesters
-                    }
-                }
-            }
-        };
+    const academicData = {
+        branches: {"CSE":{"name":"Computer Science","color":"var(--cse-color)","icon":"fas fa-laptop-code","semesters":{"1":[{"code":"U23ENG101A","name":"Communication Skills in English","credits":3},{"code":"U23MAT102A","name":"Linear Algebra and Calculus With MATLAB","credits":4},{"code":"U23PHY103B","name":"Engineering Physics","credits":3},{"code":"U23PPR105","name":"Problem Solving using Python Programming","credits":3},{"code":"U23BEE106A","name":"Basic Electrical and Electronics Engineering","credits":3},{"code":"U23TAM101","name":"Heritage of Tamils","credits":1},{"code":"U23PHL110","name":"Engineering Physics Lab","credits":1},{"code":"U23BEEL113","name":"Basic Electrical and Electronics Engineering Lab","credits":1},{"code":"U23PPL112","name":"Python Programming Lab","credits":1}],"2":[{"code":"U23ENG201A","name":"Technical English","credits":2},{"code":"U23MAT202B","name":"Discrete Mathematics","credits":4},{"code":"U23CHE204B","name":"Chemistry For Computer Science","credits":3},{"code":"U23CPR205B","name":"Programming In C","credits":3},{"code":"U23EGR207","name":"Engineering Graphics","credits":3},{"code":"U23EC203","name":"Digital Principles And System Design","credits":3},{"code":"U23CHL211","name":"Chemistry Lab","credits":1},{"code":"U23CPL212","name":"C programming Lab","credits":1},{"code":"U23TAM201","name":"Tamils And Technology","credits":1}],"3":[{"code":"U23MAT301D","name":"Probability and Statistics","credits":4},{"code":"U23CS301","name":"Data Structures","credits":3},{"code":"U23CS302","name":"Computer Architecture","credits":3},{"code":"U23CS303","name":"Object Oriented Programming","credits":3},{"code":"U23CS304","name":"Operating Systems","credits":3},{"code":"U23CS305","name":"Computer Information and Ethics","credits":3},{"code":"U23CS306","name":"Data Structures Lab","credits":1},{"code":"U23CS307","name":"Object Oriented Programming Lab","credits":1},{"code":"U23GE301","name":"Soft Skills and Aptitude-I","credits":1},{"code":"Noc24-mg72","name":"NPTEL:design Thinking-A Primer","credits":1}],"4":[{"code":"U23MAT401B","name":"Numerical Methods","credits":4},{"code":"U23CS401","name":"Design And Analysis of Algorithms","credits":3},{"code":"U23CS402","name":"Software Engineering","credits":3},{"code":"U23CS403","name":"DataBase Management Systems","credits":3},{"code":"U23CS404","name":"Embedded System Design ","credits":3},{"code":"U23CS405","name":"Software Development Lab","credits":1},{"code":"U23CS403","name":"Database Management Systems Lab","credits":1}],"5":[{"code":"U23CS504","name":"Machine Learning","credits":3},{"code":"U23CS501","name":"Computer Networks","credits":3},{"code":"U23CS502","name":"Artificial Intelligence","credits":3},{"code":"U23CS503","name":"Theory of Computation","credits":3},{"code":"noc25-cs135","name":"Elective NPTEL","credits":3},{"code":" U23CS947 / U23CS903","name":"Professional Elective ","credits":3},{"code":"U23CS505","name":"Computer Networks Laboratory","credits":2},{"code":"U23CS506","name":"Artificial Intelligence and Machine Learning Laboratory","credits":1},{"code":"U23GE501","name":"Soft Skills and Aptitude -III","credits":1}],"6":[],"7":[],"8":[]}},
+            "IT":{"name":"Info. Technology","color":"var(--it-color)","icon":"fas fa-network-wired","semesters":{"1":[{"code":"U23IT101","name":"Programming Fundamentals","credits":4},{"code":"U23IT102","name":"Discrete Mathematics","credits":4},{"code":"U23IT103","name":"Digital Systems","credits":3},{"code":"U23IT104","name":"Computer Organization","credits":3},{"code":"U23IT105","name":"Communication Skills","credits":2},{"code":"U23IT106","name":"Programming Lab","credits":1},{"code":"U23IT107","name":"Digital Systems Lab","credits":1}],"2":[{"code":"U23IT201","name":"Data Structures","credits":4},{"code":"U23IT202","name":"Database Systems","credits":4},{"code":"U23IT203","name":"Operating Systems","credits":3},{"code":"U23IT204","name":"Computer Networks","credits":3},{"code":"U23IT205","name":"Web Technologies","credits":3},{"code":"U23IT206","name":"Data Structures Lab","credits":1},{"code":"U23IT207","name":"Web Technologies Lab","credits":1}],"3":[],"4":[],"5":[],"6":[],"7":[],"8":[]}},
+            "ECE":{"name":"Electronics & Comm","color":"var(--ece-color)","icon":"fas fa-satellite-dish","semesters":{"1":[{"code":"U23EC101","name":"Basic Electronics","credits":4},{"code":"U23EC102","name":"Circuit Theory","credits":4},{"code":"U23EC103","name":"Engineering Mathematics","credits":4},{"code":"U23EC104","name":"Programming in C","credits":3},{"code":"U23EC105","name":"Communication Skills","credits":2},{"code":"U23EC106","name":"Electronics Lab","credits":1},{"code":"U23EC107","name":"Programming Lab","credits":1}],"2":[{"code":"U23EC201","name":"Analog Electronics","credits":4},{"code":"U23EC202","name":"Digital Electronics","credits":4},{"code":"U23EC203","name":"Signals and Systems","credits":4},{"code":"U23EC204","name":"Electromagnetic Theory","credits":3},{"code":"U23EC205","name":"Data Structures","credits":3},{"code":"U23EC206","name":"Analog Electronics Lab","credits":1},{"code":"U23EC207","name":"Digital Electronics Lab","credits":1}],"3":[],"4":[],"5":[],"6":[],"7":[],"8":[]}},
+            "EEE":{"name":"Electrical & Electronics","color":"var(--eee-color)","icon":"fas fa-bolt","semesters":{"1":[{"code":"U23EE101","name":"Basic Electrical Engineering","credits":4},{"code":"U23EE102","name":"Engineering Mathematics","credits":4},{"code":"U23EE103","name":"Electronics Engineering","credits":3},{"code":"U23EE104","name":"Programming in C","credits":3},{"code":"U23EE105","name":"Communication Skills","credits":2},{"code":"U23EE106","name":"Electrical Lab","credits":1},{"code":"U23EE107","name":"Programming Lab","credits":1}],"2":[{"code":"U23EE201","name":"Circuit Theory","credits":4},{"code":"U23EE202","name":"Electromagnetic Theory","credits":4},{"code":"U23EE203","name":"Digital Electronics","credits":4},{"code":"U23EE204","name":"Electrical Machines","credits":3},{"code":"U23EE205","name":"Data Structures","credits":3},{"code":"U23EE206","name":"Circuit Theory Lab","credits":1},{"code":"U23EE207","name":"Digital Electronics Lab","credits":1}],"3":[],"4":[],"5":[],"6":[],"7":[],"8":[]}},
+            "MECH":{"name":"Mechanical","color":"var(--mech-color)","icon":"fas fa-cogs","semesters":{"1":[{"code":"U23ME101","name":"Engineering Mechanics","credits":4},{"code":"U23ME102","name":"Engineering Graphics","credits":4},{"code":"U23ME103","name":"Engineering Mathematics","credits":4},{"code":"U23ME104","name":"Basic Electrical Engineering","credits":3},{"code":"U23ME105","name":"Communication Skills","credits":2},{"code":"U23ME106","name":"Workshop Practice","credits":1},{"code":"U23ME107","name":"Engineering Graphics Lab","credits":1}],"2":[{"code":"U23ME201","name":"Thermodynamics","credits":4},{"code":"U23ME202","name":"Mechanics of Materials","credits":4},{"code":"U23ME203","name":"Manufacturing Technology","credits":4},{"code":"U23ME204","name":"Fluid Mechanics","credits":3},{"code":"U23ME205","name":"Computer Programming","credits":3},{"code":"U23ME206","name":"Thermodynamics Lab","credits":1},{"code":"U23ME207","name":"Manufacturing Technology Lab","credits":1}],"3":[],"4":[],"5":[],"6":[],"7":[],"8":[]}},
+            "AIML":{"name":"AI & Machine Learning","color":"var(--aiml-color)","icon":"fas fa-brain","semesters":{"1":[{"code":"U23EG107","name":"Engineering Graphics","credits":3},{"code":"U23ENG101A","name":"Communication Skills in English","credits":3},{"code":"U23MAT102A","name":"Linear Algebra and Calculus with MATLAB","credits":4},{"code":"U23PPR105","name":"Problem Solving using Python Programming","credits":3},{"code":"U23PHY103E","name":"Engineering Physics","credits":3},{"code":"U23PHL110","name":"Engineering Physics Laboratory","credits":1},{"code":"U23PPL112","name":"Python Programming Laboratory","credits":1},{"code":"U23TAM101","name":"Heritage of Tamils","credits":1}],"2":[{"code":"U23ENG201A","name":"Technical English","credits":2},{"code":"U23MAT202D","name":"Discrete Mathematics","credits":4},{"code":"U23BEEE206B","name":"Basics of Electrical and Electronics Engineering","credits":3},{"code":"U23CPR205","name":"Programming in C","credits":3},{"code":"U23CHE204C","name":"Applied Chemistry","credits":2},{"code":"U23EC203","name":"Digital Principles and System Design","credits":3},{"code":"U23CPL212","name":"C Programming Laboratory","credits":1},{"code":"U23CHL211","name":"Chemistry Laboratory","credits":1},{"code":"U23BEEL213B","name":"BEEE Laboratory","credits":1},{"code":"U23TAM201","name":"Tamils and Technology","credits":1}],"3":[{"code":"U23MAT301E","name":"Applied Probability and Statistics-I","credits":4},{"code":"U23CS301","name":"Data Structures","credits":3},{"code":"U23CS302","name":"Computer Architecture","credits":3},{"code":"U23CS303","name":"Object Oriented Programming Using Java","credits":3},{"code":"U23AML301","name":"Data Visualization","credits":3},{"code":"noc25-mg106","name":"NPTEL: Design Thinking - A Primer","credits":1},{"code":"U23CS306","name":"Data Structures Laboratory","credits":1},{"code":"U23CS307","name":"Object Oriented Programming Using Java Laboratory","credits":1},{"code":"U23AML302","name":"Data Visualization Laboratory","credits":1},{"code":"U23GE301","name":"Soft Skills and Aptitude-I","credits":1}],"4":[{"code":"U23MAT401A","name":"Applied Probability and Statistics-II","credits":4},{"code":"U23CS403","name":"Database Management Systems","credits":3},{"code":"U23CS401","name":"Design and Analysis of Algorithms","credits":3},{"code":"U23AML401","name":"Artificial Intelligence","credits":3},{"code":"U23CSD402","name":"Operating Systems","credits":3},{"code":"U23AML402","name":"Artificial Intelligence Lab","credits":1},{"code":"U23CS405","name":"Database Management Systems Lab","credits":1},{"code":"U23GE401","name":"Soft Skills and Aptitude-II","credits":1}],"5":[{"code":"U23CS504","name":"Machine Learning","credits":3},{"code":"U23CS501","name":"Computer Networks","credits":3},{"code":"U23CSD502","name":"Software Engineering","credits":3},{"code":"U23CS503","name":"Theory of Computation","credits":3},{"code":"noc25-cs135","name":"Elective NPTEL","credits":3},{"code":"U19CS903","name":"Professional Elective - Agile Methodologies","credits":3},{"code":"U23AML501","name":"Machine Learning Laboratory","credits":2},{"code":"U23CSD504","name":"Software Development Laboratory","credits":1},{"code":"U23GE501","name":"Soft Skills and Aptitude -III","credits":1}],"6":[{"code":"U23CS601","name":"Computer Vision","credits":3},{"code":"U23CS602","name":"Reinforcement Learning","credits":3},{"code":"U23CS603","name":"Robotics","credits":3},{"code":"U23CS604","name":"Cyber Security","credits":3},{"code":"U23CS605","name":"Blockchain Technology","credits":3},{"code":"U23CS606","name":"Elective III","credits":3},{"code":"U23CS607","name":"Project Work II","credits":3}],"7":[{"code":"U23CS701","name":"Advanced Machine Learning","credits":3},{"code":"U23CS702","name":"AI Ethics and Governance","credits":3},{"code":"U23CS703","name":"Elective IV","credits":3},{"code":"U23CS704","name":"Project Work III","credits":3}],"8":[{"code":"U23CS801","name":"Industry Internship","credits":6},{"code":"U23CS802","name":"Project Work IV","credits":6}]}},
+            "CIVIL":{"name":"Civil Engineering","color":"var(--civil-color)","icon":"fas fa-building","semesters":{"1":[{"code":"U23CE101","name":"Engineering Mechanics","credits":4},{"code":"U23CE102","name":"Engineering Graphics","credits":4},{"code":"U23CE103","name":"Engineering Mathematics","credits":4},{"code":"U23CE104","name":"Basic Civil Engineering","credits":3},{"code":"U23CE105","name":"Communication Skills","credits":2},{"code":"U23CE106","name":"Surveying","credits":1},{"code":"U23CE107","name":"Engineering Graphics Lab","credits":1}],"2":[{"code":"U23CE201","name":"Building Materials","credits":4},{"code":"U23CE202","name":"Structural Analysis","credits":4},{"code":"U23CE203","name":"Fluid Mechanics","credits":4},{"code":"U23CE204","name":"Surveying","credits":3},{"code":"U23CE205","name":"Computer Programming","credits":3},{"code":"U23CE206","name":"Building Materials Lab","credits":1},{"code":"U23CE207","name":"Surveying Lab","credits":1}]}},
+            "BME":{"name":"Bio Medical","color":"var(--bme-color)","icon":"fas fa-heartbeat","semesters":{"1":[{"code":"U23BM101","name":"Human Anatomy","credits":4},{"code":"U23BM102","name":"Engineering Mathematics","credits":4},{"code":"U23BM103","name":"Basic Electronics","credits":3},{"code":"U23BM104","name":"Programming in C","credits":3},{"code":"U23BM105","name":"Communication Skills","credits":2},{"code":"U23BM106","name":"Human Anatomy Lab","credits":1},{"code":"U23BM107","name":"Programming Lab","credits":1}],"2":[{"code":"U23BM201","name":"Human Physiology","credits":4},{"code":"U23BM202","name":"Biochemistry","credits":4},{"code":"U23BM203","name":"Medical Electronics","credits":4},{"code":"U23BM204","name":"Biomechanics","credits":3},{"code":"U23BM205","name":"Data Structures","credits":3},{"code":"U23BM206","name":"Human Physiology Lab","credits":1},{"code":"U23BM207","name":"Medical Electronics Lab","credits":1}]}},
+            "FT":{"name":"Fashion Technology","color":"var(--ft-color)","icon":"fas fa-tshirt","semesters":{"1":[{"code":"U23FT101","name":"Fiber Science","credits":4},{"code":"U23FT102","name":"Textile Chemistry","credits":4},{"code":"U23FT103","name":"Fashion Illustration","credits":3},{"code":"U23FT104","name":"Pattern Making","credits":3},{"code":"U23FT105","name":"Communication Skills","credits":2},{"code":"U23FT106","name":"Textile Chemistry Lab","credits":1},{"code":"U23FT107","name":"Pattern Making Lab","credits":1}],"2":[{"code":"U23FT201","name":"Textile Processing","credits":4},{"code":"U23FT202","name":"Apparel Manufacturing","credits":4},{"code":"U23FT203","name":"Fashion Design","credits":4},{"code":"U23FT204","name":"Garment Construction","credits":3},{"code":"U23FT205","name":"Computer Applications","credits":3},{"code":"U23FT206","name":"Apparel Manufacturing Lab","credits":1},{"code":"U23FT207","name":"Garment Construction Lab","credits":1}]}},
+            "MCT":{"name":"Mechatronics","color":"var(--mct-color)","icon":"fas fa-robot","semesters":{"1":[{"code":"U23MT101","name":"Engineering Mechanics","credits":4},{"code":"U23MT102","name":"Engineering Graphics","credits":4},{"code":"U23MT103","name":"Engineering Mathematics","credits":4},{"code":"U23MT104","name":"Basic Electronics","credits":3},{"code":"U23MT105","name":"Communication Skills","credits":2},{"code":"U23MT106","name":"Workshop Practice","credits":1},{"code":"U23MT107","name":"Engineering Graphics Lab","credits":1}],"2":[{"code":"U23MT201","name":"Thermodynamics","credits":4},{"code":"U23MT202","name":"Mechanics of Materials","credits":4},{"code":"U23MT203","name":"Digital Electronics","credits":4},{"code":"U23MT204","name":"Fluid Mechanics","credits":3},{"code":"U23MT205","name":"Computer Programming","credits":3},{"code":"U23MT206","name":"Thermodynamics Lab","credits":1},{"code":"U23MT207","name":"Digital Electronics Lab","credits":1}]}},
+            "CSD":{"name":"CS & Design","color":"var(--csd-color)","icon":"fas fa-paint-brush","semesters":{"1":[{"code":"U23CD101","name":"Design Fundamentals","credits":4},{"code":"U23CD102","name":"Programming Basics","credits":4},{"code":"U23CD103","name":"Visual Communication","credits":3},{"code":"U23CD104","name":"Mathematics for Design","credits":3},{"code":"U23CD105","name":"Communication Skills","credits":2},{"code":"U23CD106","name":"Design Studio","credits":1},{"code":"U23CD107","name":"Programming Lab","credits":1}],"2":[{"code":"U23CD201","name":"User Interface Design","credits":4},{"code":"U23CD202","name":"Data Structures","credits":4},{"code":"U23CD203","name":"Web Design","credits":4},{"code":"U23CD204","name":"Digital Illustration","credits":3},{"code":"U23CD205","name":"Human-Computer Interaction","credits":3},{"code":"U23CD206","name":"UI Design Lab","credits":1},{"code":"U23CD207","name":"Web Design Lab","credits":1}]}},
+            "ADS":{"name":"AI & Data Science","color":"var(--ads-color)","icon":"fas fa-database","semesters":{"1":[{"code":"U23DS101","name":"Programming Fundamentals","credits":4},{"code":"U23DS102","name":"Linear Algebra","credits":4},{"code":"U23DS103","name":"Statistics Basics","credits":3},{"code":"U23DS104","name":"Computational Thinking","credits":3},{"code":"U23DS105","name":"Communication Skills","credits":2},{"code":"U23DS106","name":"Programming Lab","credits":1},{"code":"U23DS107","name":"Statistics Lab","credits":1}],"2":[{"code":"U23DS201","name":"Data Structures","credits":4},{"code":"U23DS202","name":"Probability and Statistics","credits":4},{"code":"U23DS203","name":"Database Systems","credits":4},{"code":"U23DS204","name":"Data Visualization","credits":3},{"code":"U23DS205","name":"Python Programming","credits":3},{"code":"U23DS206","name":"Data Structures Lab","credits":1},{"code":"U23DS207","name":"Database Lab","credits":1}]}},
+            "EFE":{"name":"Electrical & Computer","color":"var(--efe-color)","icon":"fas fa-microchip","semesters":{"1":[{"code":"U23EF101","name":"Circuit Theory","credits":4},{"code":"U23EF102","name":"Programming Fundamentals","credits":4},{"code":"U23EF103","name":"Digital Electronics","credits":3},{"code":"U23EF104","name":"Engineering Mathematics","credits":3},{"code":"U23EF105","name":"Communication Skills","credits":2},{"code":"U23EF106","name":"Circuit Theory Lab","credits":1},{"code":"U23EF107","name":"Programming Lab","credits":1}],"2":[{"code":"U23EF201","name":"Signals and Systems","credits":4},{"code":"U23EF202","name":"Data Structures","credits":4},{"code":"U23EF203","name":"Analog Electronics","credits":4},{"code":"U23EF204","name":"Electromagnetic Theory","credits":3},{"code":"U23EF205","name":"Computer Organization","credits":3},{"code":"U23EF206","name":"Analog Electronics Lab","credits":1},{"code":"U23EF207","name":"Data Structures Lab","credits":1}]}},
+            "EXE":{"name":"Electronics & Computer","color":"var(--exe-color)","icon":"fas fa-desktop","semesters":{"1":[{"code":"U23EX101","name":"Basic Electronics","credits":4},{"code":"U23EX102","name":"Programming Fundamentals","credits":4},{"code":"U23EX103","name":"Digital Logic Design","credits":3},{"code":"U23EX104","name":"Engineering Mathematics","credits":3},{"code":"U23EX105","name":"Communication Skills","credits":2},{"code":"U23EX106","name":"Electronics Lab","credits":1},{"code":"U23EX107","name":"Programming Lab","credits":1}],"2":[{"code":"U23EX201","name":"Data Structures","credits":4},{"code":"U23EX202","name":"Analog Electronics","credits":4},{"code":"U23EX203","name":"Computer Organization","credits":4},{"code":"U23EX204","name":"Signals and Systems","credits":3},{"code":"U23EX205","name":"Database Systems","credits":3},{"code":"U23EX206","name":"Analog Electronics Lab","credits":1},{"code":"U23EX207","name":"Data Structures Lab","credits":1}]}}}
+    };
 
-        const gradePoints = {
-            "O": 10, 
-            "A+": 9, 
-            "A": 8, 
-            "B+": 7, 
-            "B": 6, 
-            "C": 5, 
-            "U": 0
-        };
+    const gradePoints = { "O": 10, "A+": 9, "A": 8, "B+": 7, "B": 6, "C": 5, "U": 0 };
+    let currentBranch = "", currentGrades = {}, gpaPerSem = {}, gradeDistSummaryChart;
+    const debounce = (func, delay) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; };
+    const debouncedFullUpdate = debounce(() => updateAllDisplays(), 400);
 
-        let currentBranch = "";
-        let selectedGrades = JSON.parse(localStorage.getItem("selectedGrades")) || {};
-        let gpaPerSem = JSON.parse(localStorage.getItem("gpaPerSem")) || {};
+    document.addEventListener('DOMContentLoaded', () => {
+        const semesterSelect = document.getElementById('semester');
+        const subjectForm = document.getElementById('subjectForm');
 
-        // Initialize the calculator
-        function init() {
-            loadBranches();
-            loadCGPAInputs();
-            
-            // Load last selected branch and semester if available
-            const lastBranch = localStorage.getItem("lastBranch");
+        loadState();
+        loadBranches();
+        initCharts();
+
+        if (currentBranch && academicData.branches[currentBranch]) {
+            selectBranch(currentBranch, true);
             const lastSem = localStorage.getItem("lastSemester");
-            
-            if (lastBranch && academicData.branches[lastBranch]) {
-                selectBranch(lastBranch);
-                if (lastSem && academicData.branches[lastBranch].semesters[lastSem]) {
-                    document.getElementById("semester").value = lastSem;
-                    loadSubjects();
-                }
-            }
-            
-            // Check for saved theme preference
-            if (localStorage.getItem('darkMode') === 'enabled') {
-                document.body.classList.add('dark-mode');
-                document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
-            }
+            if (lastSem) { semesterSelect.value = lastSem; loadSubjects(); }
+        } else {
+            subjectForm.innerHTML = `<div class="empty-state"><i class="fas fa-hand-pointer"></i><p>Please select your branch to get started.</p></div>`;
         }
-
-        // Toggle help section
-        function toggleHelp() {
-            document.getElementById('helpSection').classList.toggle('show');
-        }
-
-        // Toggle dark mode
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const isDarkMode = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
-            
-            const icon = document.getElementById('themeToggle').querySelector('i');
-            if (isDarkMode) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            } else {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            }
-        }
-
-        // Show loading spinner
-        function showLoading(show) {
-            const spinner = document.getElementById('loadingSpinner');
-            spinner.style.display = show ? 'flex' : 'none';
-        }
-
-        // Load all available branches
-        function loadBranches() {
-            const branchSelection = document.getElementById("branchSelection");
-            branchSelection.innerHTML = "";
-            
-            for (const branchCode in academicData.branches) {
-                const branch = academicData.branches[branchCode];
-                branchSelection.innerHTML += `
-                    <div class="branch-card" onclick="selectBranch('${branchCode}')" 
-                         style="border-left-color: ${branch.color}">
-                        <div class="branch-icon" style="color: ${branch.color}">
-                            <i class="${branch.icon}"></i>
-                        </div>
-                        <div class="branch-name">${branch.name}</div>
-                        <div class="branch-code">${branchCode}</div>
-                    </div>`;
-            }
-        }
-
-        // Select a branch
-        function selectBranch(branchCode) {
-            currentBranch = branchCode;
-            localStorage.setItem("lastBranch", branchCode);
-            
-            // Update UI
-            document.getElementById("semesterGroup").style.display = "block";
-            document.getElementById("semester").value = "";
-            document.getElementById("subjectForm").innerHTML = "";
-            document.getElementById("gpaResult").style.display = "none";
-            
-            // Highlight selected branch
-            const branchCards = document.querySelectorAll(".branch-card");
-            branchCards.forEach(card => card.classList.remove("selected"));
-            
-            const selectedCard = document.querySelector(`.branch-card[onclick="selectBranch('${branchCode}')"]`);
-            if (selectedCard) {
-                selectedCard.classList.add("selected");
-            }
-            
-            // Update title
-            document.getElementById("mainTitle").textContent = 
-                `B.E. ${academicData.branches[branchCode].name} GPA & CGPA Calculator`;
-        }
-
-        // Load subjects for selected semester
-        function loadSubjects() {
-            showLoading(true);
-            
-            // Use setTimeout to allow UI to update before heavy DOM operations
-            setTimeout(() => {
-                const sem = document.getElementById("semester").value;
-                const form = document.getElementById("subjectForm");
-                form.innerHTML = "";
-                
-                if (!sem || !currentBranch || !academicData.branches[currentBranch] || 
-                    !academicData.branches[currentBranch].semesters[sem]) {
-                    showLoading(false);
-                    return;
-                }
-                
-                localStorage.setItem("lastSemester", sem);
-                
-                const semesterKey = `${currentBranch}_${sem}`;
-                if (!selectedGrades[semesterKey]) {
-                    selectedGrades[semesterKey] = Array(academicData.branches[currentBranch].semesters[sem].length).fill("");
-                }
-                
-                let html = `<div class="subject-grid">`;
-                
-                academicData.branches[currentBranch].semesters[sem].forEach((sub, i) => {
-                    const savedGrade = selectedGrades[semesterKey][i] || "";
-                    const gradeClass = savedGrade ? `grade-${savedGrade.replace('+', 'plus')}` : '';
-                    
-                    html += `
-                        <div class="subject-card ${gradeClass}" id="card${i}">
-                            <div class="subject-header">
-                                <span class="subject-code">${sub.code}</span>
-                                <span class="subject-credits">${sub.credits} Credits</span>
-                            </div>
-                            <div class="subject-name">${sub.name}</div>
-                            <div class="subject-grade">
-                                <select id="grade${i}" onchange="updateGPA(${sem}, ${i})" class="${gradeClass}">
-                                    <option value="">-- Select Grade --</option>
-                                    <option value="O" ${savedGrade === "O" ? "selected" : ""}>O (10)</option>
-                                    <option value="A+" ${savedGrade === "A+" ? "selected" : ""}>A+ (9)</option>
-                                    <option value="A" ${savedGrade === "A" ? "selected" : ""}>A (8)</option>
-                                    <option value="B+" ${savedGrade === "B+" ? "selected" : ""}>B+ (7)</option>
-                                    <option value="B" ${savedGrade === "B" ? "selected" : ""}>B (6)</option>
-                                    <option value="C" ${savedGrade === "C" ? "selected" : ""}>C (5)</option>
-                                    <option value="U" ${savedGrade === "U" ? "selected" : ""}>U (Fail)</option>
-                                </select>
-                            </div>
-                        </div>`;
-                });
-                
-                html += `</div>`;
-                form.innerHTML = html;
-                showLoading(false);
-                
-                // Animate the appearance of subject cards
-                const cards = document.querySelectorAll('.subject-card');
-                cards.forEach((card, index) => {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(20px)';
-                    card.style.transition = `all 0.3s ease ${index * 0.05}s`;
-                    
-                    setTimeout(() => {
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0)';
-                    }, 50);
-                });
-            }, 100);
-        }
-
-        // Update GPA calculation
-        function updateGPA(sem, index) {
-            showLoading(true);
-            
-            setTimeout(() => {
-                if (!currentBranch || !academicData.branches[currentBranch] || 
-                    !academicData.branches[currentBranch].semesters[sem]) {
-                    showLoading(false);
-                    return;
-                }
-                
-                const semesterKey = `${currentBranch}_${sem}`;
-                const gradeSelect = document.getElementById(`grade${index}`);
-                const grade = gradeSelect ? gradeSelect.value : "";
-                selectedGrades[semesterKey][index] = grade;
-                
-                const card = document.getElementById(`card${index}`);
-                if (card) {
-                    // Remove all grade classes
-                    card.className = 'subject-card';
-                    gradeSelect.className = '';
-                    
-                    if (grade) {
-                        const gradeClass = `grade-${grade.replace('+', 'plus')}`;
-                        card.classList.add(gradeClass);
-                        gradeSelect.classList.add(gradeClass);
-                    }
-                }
-                
-                localStorage.setItem("selectedGrades", JSON.stringify(selectedGrades));
-                
-                // Calculate GPA
-                let total = 0, credits = 0, hasU = false;
-                let arrearsList = [];
-                
-                academicData.branches[currentBranch].semesters[sem].forEach((sub, i) => {
-                    const grade = selectedGrades[semesterKey][i] || "";
-                    
-                    if (grade === "U") {
-                        hasU = true;
-                        arrearsList.push({name: sub.name, index: i});
-                    }
-                    
-                    if (grade && gradePoints[grade] !== undefined && sub.credits > 0) {
-                        total += gradePoints[grade] * sub.credits;
-                        credits += sub.credits;
-                    }
-                });
-                
-                const gpa = (credits > 0) ? (total / credits).toFixed(2) : 0;
-                gpaPerSem[semesterKey] = {gpa: parseFloat(gpa), credits};
-                localStorage.setItem("gpaPerSem", JSON.stringify(gpaPerSem));
-                
-                // Update GPA display
-                const gpaResult = document.getElementById("gpaResult");
-                const gpaValue = document.getElementById("gpaValue");
-                const gpaProgress = document.getElementById("gpaProgress");
-                
-                gpaResult.style.display = "flex";
-                gpaValue.textContent = gpa;
-                gpaProgress.style.width = `${(gpa / 10) * 100}%`;
-                
-                // Animate the result card
-                gpaResult.style.opacity = '0';
-                gpaResult.style.transform = 'scale(0.9)';
-                setTimeout(() => {
-                    gpaResult.style.opacity = '1';
-                    gpaResult.style.transform = 'scale(1)';
-                }, 100);
-                
-                // Set result card style based on GPA
-                gpaResult.className = "result-card gpa-result";
-                if (hasU) {
-                    gpaResult.classList.add("fail");
-                }
-                
-                // Update arrears list
-                updateArrears(arrearsList);
-                
-                // Update CGPA
-                updateCGPA();
-                loadCGPAInputs(); // Refresh CGPA inputs to show updated GPA
-                
-                showLoading(false);
-            }, 100);
-        }
-
-        // Update arrears list display
-        function updateArrears(arrearsList) {
-            const arrearsContainer = document.getElementById("arrears");
-            const arrearsListElement = document.getElementById("arrearsList");
-            
-            if (arrearsList.length > 0) {
-                arrearsListElement.innerHTML = arrearsList.map(sub => 
-                    `<li onclick="highlightCard(${sub.index})">
-                        <span>${sub.name}</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </li>`
-                ).join("");
-                
-                // Animate the appearance
-                arrearsContainer.style.maxHeight = '0';
-                arrearsContainer.style.opacity = '0';
-                setTimeout(() => {
-                    arrearsContainer.classList.add("show");
-                }, 100);
-            } else {
-                arrearsContainer.classList.remove("show");
-            }
-        }
-
-        // Toggle arrears visibility
-        function toggleArrears() {
-            const arrearsContainer = document.getElementById("arrears");
-            const chevron = arrearsContainer.querySelector('.fa-chevron-down');
-            
-            arrearsContainer.classList.toggle("show");
-            chevron.classList.toggle('rotate');
-        }
-
-        // Highlight a specific card
-        function highlightCard(index) {
-            const cards = document.querySelectorAll(".subject-card");
-            cards.forEach(c => {
-                c.style.boxShadow = "";
-                c.style.transition = "all 0.3s ease";
-            });
-            
-            const card = document.getElementById(`card${index}`);
-            if (card) {
-                card.style.boxShadow = "0 0 15px 5px rgba(255, 255, 0, 0.7)";
-                card.style.transition = "all 0.5s ease";
-                card.scrollIntoView({behavior: "smooth", block: "center"});
-                
-                // Remove highlight after 3 seconds
-                setTimeout(() => {
-                    card.style.boxShadow = "";
-                }, 3000);
-            }
-        }
-
-        // Load CGPA inputs for all semesters
-        function loadCGPAInputs() {
-            const cgpaContainer = document.getElementById("cgpaContainer");
-            let html = "";
-            
-            if (!currentBranch) return;
-            
-            for (let sem = 1; sem <= 8; sem++) {
-                const semesterKey = `${currentBranch}_${sem}`;
-                const semData = gpaPerSem[semesterKey] || {gpa: 0, credits: 0};
-                const isAutoFetched = semData.gpa > 0 && semData.credits > 0;
-                
-                html += `
-                    <div class="semester-input">
-                        <label for="cgpaSem${sem}">Semester ${sem} GPA</label>
-                        ${isAutoFetched ? 
-                            `<div class="auto-fetch">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Auto-fetched</span>
-                            </div>` : ''
-                        }
-                        <input type="number" id="cgpaSem${sem}" min="0" max="10" step="0.01" 
-                               value="${semData.gpa.toFixed(2)}" 
-                               onchange="updateManualCGPA(${sem})" 
-                               placeholder="0.00"
-                               ${isAutoFetched ? 'readonly' : ''}>
-                    </div>`;
-            }
-            
-            cgpaContainer.innerHTML = html;
-            
-            // Animate the inputs
-            const inputs = document.querySelectorAll('.semester-input');
-            inputs.forEach((input, index) => {
-                input.style.opacity = '0';
-                input.style.transform = 'translateY(20px)';
-                input.style.transition = `all 0.3s ease ${index * 0.05}s`;
-                
-                setTimeout(() => {
-                    input.style.opacity = '1';
-                    input.style.transform = 'translateY(0)';
-                }, 50);
-            });
-            
-            updateCGPA();
-        }
-
-        // Update CGPA when manual inputs change
-        function updateManualCGPA(sem) {
-            if (!currentBranch) return;
-            
-            const semesterKey = `${currentBranch}_${sem}`;
-            const input = document.getElementById(`cgpaSem${sem}`);
-            const value = parseFloat(input.value) || 0;
-            
-            // Validate input
-            if (value < 0 || value > 10) {
-                alert("Please enter a GPA between 0 and 10");
-                input.value = gpaPerSem[semesterKey]?.gpa.toFixed(2) || "0.00";
-                return;
-            }
-            
-            // Get credits for this semester (use default if not available)
-            const credits = academicData.branches[currentBranch]?.semesters[sem] ? 
-                academicData.branches[currentBranch].semesters[sem].reduce((sum, sub) => sum + sub.credits, 0) : 
-                20; // Default average credits
-            
-            gpaPerSem[semesterKey] = {gpa: value, credits};
-            localStorage.setItem("gpaPerSem", JSON.stringify(gpaPerSem));
-            updateCGPA();
-        }
-
-        // Calculate and display CGPA
-        function updateCGPA() {
-            if (!currentBranch) return;
-            
-            let totalWeightedGPA = 0, totalCredits = 0;
-            let hasLow = false;
-            
-            for (let sem = 1; sem <= 8; sem++) {
-                const semesterKey = `${currentBranch}_${sem}`;
-                const data = gpaPerSem[semesterKey];
-                if (data && data.gpa > 0) {
-                    totalWeightedGPA += data.gpa * data.credits;
-                    totalCredits += data.credits;
-                    if (data.gpa < 5) hasLow = true;
-                }
-            }
-            
-            const cgpaResult = document.getElementById("cgpaResult");
-            const cgpaValue = document.getElementById("cgpaValue");
-            const cgpaProgress = document.getElementById("cgpaProgress");
-            
-            if (totalCredits === 0) {
-                cgpaValue.textContent = "0.00";
-                cgpaProgress.style.width = "0%";
-                return;
-            }
-            
-            const cgpa = (totalWeightedGPA / totalCredits).toFixed(2);
-            cgpaValue.textContent = cgpa;
-            cgpaProgress.style.width = `${(cgpa / 10) * 100}%`;
-            
-            // Animate the result card
-            cgpaResult.style.opacity = '0';
-            cgpaResult.style.transform = 'scale(0.9)';
-            setTimeout(() => {
-                cgpaResult.style.opacity = '1';
-                cgpaResult.style.transform = 'scale(1)';
-            }, 100);
-            
-            // Set result card style based on CGPA
-            cgpaResult.className = "result-card cgpa-result";
-            if (hasLow) {
-                cgpaResult.classList.add("fail");
-            } else if (cgpa >= 9) {
-                cgpaResult.classList.add("high");
-                createConfetti();
-            }
-        }
-
-        // Create confetti effect
-        function createConfetti() {
-            if (parseFloat(document.getElementById("cgpaValue").textContent) < 9) return;
-            
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff9900', '#9900ff'];
-            const shapes = ['circle', 'square', 'triangle'];
-            
-            // Create container if it doesn't exist
-            let container = document.querySelector('.confetti-container');
-            if (!container) {
-                container = document.createElement('div');
-                container.className = 'confetti-container';
-                document.body.appendChild(container);
-            }
-            
-            // Clear previous confetti
-            container.innerHTML = '';
-            
-            for (let i = 0; i < 200; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                
-                // Random position
-                confetti.style.left = `${Math.random() * 100}vw`;
-                
-                // Random color
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                
-                // Random size
-                const size = Math.random() * 10 + 5;
-                confetti.style.width = `${size}px`;
-                confetti.style.height = `${size}px`;
-                
-                // Random shape
-                if (Math.random() > 0.7) { // 30% chance for non-square shape
-                    const shape = shapes[Math.floor(Math.random() * shapes.length)];
-                    if (shape === 'circle') {
-                        confetti.style.borderRadius = '50%';
-                    } else if (shape === 'triangle') {
-                        confetti.style.width = '0';
-                        confetti.style.height = '0';
-                        confetti.style.backgroundColor = 'transparent';
-                        confetti.style.borderLeft = `${size/2}px solid transparent`;
-                        confetti.style.borderRight = `${size/2}px solid transparent`;
-                        confetti.style.borderBottom = `${size}px solid ${colors[Math.floor(Math.random() * colors.length)]}`;
-                    }
-                }
-                
-                // Random rotation
-                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-                
-                // Random opacity
-                confetti.style.opacity = Math.random() * 0.7 + 0.3;
-                
-                // Random animation duration and delay
-                const duration = Math.random() * 3 + 2;
-                const delay = Math.random() * 2;
-                confetti.style.animation = `confetti-fall ${duration}s ease-in-out ${delay}s forwards`;
-                
-                container.appendChild(confetti);
-            }
-            
-            // Remove container after animation completes
-            setTimeout(() => {
-                container.remove();
-            }, 7000);
-        }
-
-        // Export to PDF
-        function exportToPDF() {
-            showLoading(true);
-            
-            setTimeout(() => {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                // Get current date for filename
-                const today = new Date();
-                const dateStr = today.toISOString().split('T')[0];
-                
-                // Get branch name for filename
-                const branchName = currentBranch ? academicData.branches[currentBranch].name.replace(/ /g, '_') : 'Results';
-                
-                // Capture the main container
-                html2canvas(document.querySelector('.container')).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const imgWidth = 210; // A4 width in mm
-                    const pageHeight = 295; // A4 height in mm
-                    const imgHeight = canvas.height * imgWidth / canvas.width;
-                    let heightLeft = imgHeight;
-                    let position = 0;
-                    
-                    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                    
-                    // Add new pages if content is longer than one page
-                    while (heightLeft >= 0) {
-                        position = heightLeft - imgHeight;
-                        doc.addPage();
-                        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                        heightLeft -= pageHeight;
-                    }
-                    
-                    doc.save(`${branchName}_GPA_Results_${dateStr}.pdf`);
-                    showLoading(false);
-                });
-            }, 500);
-        }
-
-        // Export to CSV
-        function exportToCSV() {
-            showLoading(true);
-            
-            setTimeout(() => {
-                if (!currentBranch) {
-                    alert("Please select a branch first");
-                    showLoading(false);
-                    return;
-                }
-                
-                const today = new Date();
-                const dateStr = today.toISOString().split('T')[0];
-                const branchName = academicData.branches[currentBranch].name.replace(/ /g, '_');
-                
-                let csvContent = "data:text/csv;charset=utf-8,";
-                
-                // Add header
-                csvContent += "Semester,Subject Code,Subject Name,Credits,Grade,Grade Points\n";
-                
-                // Add subject data
-                for (let sem = 1; sem <= 8; sem++) {
-                    const semesterKey = `${currentBranch}_${sem}`;
-                    const semesterData = academicData.branches[currentBranch].semesters[sem];
-                    
-                    if (semesterData) {
-                        semesterData.forEach((sub, i) => {
-                            const grade = selectedGrades[semesterKey] ? selectedGrades[semesterKey][i] || "" : "";
-                            const gradePoint = grade ? gradePoints[grade] : "";
-                            
-                            csvContent += `${sem},${sub.code},"${sub.name}",${sub.credits},${grade},${gradePoint}\n`;
-                        });
-                    }
-                }
-                
-                // Add GPA/CGPA summary
-                csvContent += "\nSummary\n";
-                csvContent += "Semester,GPA,Credits\n";
-                
-                for (let sem = 1; sem <= 8; sem++) {
-                    const semesterKey = `${currentBranch}_${sem}`;
-                    const semData = gpaPerSem[semesterKey];
-                    
-                    if (semData) {
-                        csvContent += `${sem},${semData.gpa.toFixed(2)},${semData.credits}\n`;
-                    }
-                }
-                
-                // Calculate total CGPA
-                let totalWeightedGPA = 0, totalCredits = 0;
-                for (let sem = 1; sem <= 8; sem++) {
-                    const semesterKey = `${currentBranch}_${sem}`;
-                    const data = gpaPerSem[semesterKey];
-                    if (data && data.gpa > 0) {
-                        totalWeightedGPA += data.gpa * data.credits;
-                        totalCredits += data.credits;
-                    }
-                }
-                
-                const cgpa = totalCredits > 0 ? (totalWeightedGPA / totalCredits).toFixed(2) : 0;
-                csvContent += `\nOverall CGPA,${cgpa},Total Credits,${totalCredits}\n`;
-                
-                // Create download link
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", `${branchName}_GPA_Results_${dateStr}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                showLoading(false);
-            }, 500);
-        }
-
-        // Reset calculator
-        function resetCalculator() {
-            if (confirm("Are you sure you want to reset all data?")) {
-                showLoading(true);
-                
-                setTimeout(() => {
-                    selectedGrades = {};
-                    gpaPerSem = {};
-                    localStorage.removeItem("selectedGrades");
-                    localStorage.removeItem("gpaPerSem");
-                    localStorage.removeItem("lastBranch");
-                    localStorage.removeItem("lastSemester");
-                    
-                    currentBranch = "";
-                    document.getElementById("branchSelection").innerHTML = "";
-                    document.getElementById("semesterGroup").style.display = "none";
-                    document.getElementById("semester").value = "";
-                    document.getElementById("subjectForm").innerHTML = "";
-                    document.getElementById("gpaResult").style.display = "none";
-                    document.getElementById("arrears").classList.remove("show");
-                    document.getElementById("mainTitle").textContent = "Engineering GPA & CGPA Calculator";
-                    
-                    loadBranches();
-                    loadCGPAInputs();
-                    updateCGPA();
-                    
-                    // Show notification
-                    alert("Calculator has been reset successfully!");
-                    showLoading(false);
-                }, 500);
-            }
-        }
-
-        // Initialize when page loads
-        window.onload = init;
         
-        // Add event listeners
+        semesterSelect.addEventListener('change', loadSubjects);
+        subjectForm.addEventListener('change', handleGradeChange);
         document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
+    });
+
+    function loadState() {
+        currentGrades = JSON.parse(localStorage.getItem("currentGrades")) || {};
+        gpaPerSem = JSON.parse(localStorage.getItem("gpaPerSem")) || {};
+        currentBranch = localStorage.getItem("lastBranch") || "";
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        updateAllDisplays();
+    }
+
+    // --- Core UI Rendering ---
+    function loadBranches() {
+        const fragment = document.createDocumentFragment();
+        Object.keys(academicData.branches).forEach((code, index) => {
+            const branch = academicData.branches[code];
+            const card = document.createElement('div');
+            card.className = 'branch-card stagger-in';
+            card.style.animationDelay = `${index * 30}ms`;
+            card.dataset.branchCode = code;
+            card.innerHTML = `<div class="branch-icon" style="color: ${branch.color};"><i class="${branch.icon}"></i></div>
+                              <div class="branch-name">${branch.name}</div>`;
+            fragment.appendChild(card);
+        });
+        const branchSelection = document.getElementById("branchSelection");
+        branchSelection.innerHTML = '';
+        branchSelection.appendChild(fragment);
+        branchSelection.addEventListener('click', (e) => {
+            const card = e.target.closest('.branch-card');
+            if(card) selectBranch(card.dataset.branchCode);
+        });
+    }
+
+    function selectBranch(branchCode, isRestoring = false) {
+        if (currentBranch === branchCode && !isRestoring) return;
+        currentBranch = branchCode;
+        localStorage.setItem("lastBranch", branchCode);
+
+        document.querySelectorAll(".branch-card").forEach(c => c.classList.remove("selected"));
+        document.querySelector(`.branch-card[data-branch-code="${branchCode}"]`).classList.add("selected");
+
+        const semSelect = document.getElementById("semester");
+        const availableSems = Object.keys(academicData.branches[branchCode].semesters).filter(sem => academicData.branches[branchCode].semesters[sem]?.length > 0);
+        semSelect.innerHTML = '<option value="">-- Select Semester --</option>' + availableSems.map(sem => `<option value="${sem}">Semester ${sem}</option>`).join('');
+        
+        document.getElementById("semesterGroup").style.display = "block";
+
+        if (!isRestoring) {
+            semSelect.value = "";
+            loadSubjects();
+        }
+        updateAllDisplays();
+    }
+    
+    function loadSubjects() {
+        const sem = document.getElementById("semester").value;
+        const form = document.getElementById("subjectForm");
+        form.innerHTML = ''; 
+
+        const gpaResultEl = document.getElementById("gpaResult");
+        gpaResultEl.style.display = "none";
+
+        if (!sem) {
+            form.innerHTML = `<div class="empty-state"><i class="fas fa-arrow-up"></i><p>Please select a semester to begin.</p></div>`;
+            updateArrearsList();
+            renderGradeDistributionChart();
+            return;
+        }
+        localStorage.setItem("lastSemester", sem);
+
+        const subjects = academicData.branches[currentBranch].semesters[sem];
+        if (!subjects || subjects.length === 0) {
+            form.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><p>Subject data for this semester is not available yet.</p></div>`;
+            return;
+        }
+
+        const grid = document.createElement('div');
+        grid.className = 'subject-grid';
+        const fragment = document.createDocumentFragment();
+        const semesterKey = `${currentBranch}_${sem}`;
+        if (!currentGrades[semesterKey]) currentGrades[semesterKey] = Array(subjects.length).fill("");
+        
+        subjects.forEach((sub, i) => {
+            const card = document.createElement('div');
+            card.className = 'subject-card stagger-in';
+            card.style.animationDelay = `${i * 30}ms`;
+            card.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px;">
+                                <span style="font-weight: 600; font-size: 0.9rem;">${sub.code}</span>
+                                <span style="background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 20px; font-size: 0.85rem;">${sub.credits} Credits</span>
+                              </div>
+                              <div style="margin: 12px 0; font-size: 1.05rem; min-height: 40px;">${sub.name}</div>
+                              <select data-index="${i}"></select>`;
+            
+            const select = card.querySelector('select');
+            select.innerHTML = '<option value="">-- Grade --</option>' + Object.keys(gradePoints).map(g => `<option value="${g}">${g}</option>`).join('');
+            select.value = currentGrades[semesterKey][i] || "";
+            fragment.appendChild(card);
+        });
+        
+        grid.appendChild(fragment);
+        form.appendChild(grid);
+        
+        calculateGPA(sem);
+        updateAllDisplays();
+    }
+    
+    // --- Calculation & Logic ---
+    function handleGradeChange(e) {
+        if (e.target.tagName !== 'SELECT') return;
+        const sem = document.getElementById("semester").value;
+        const index = parseInt(e.target.dataset.index, 10);
+        const grade = e.target.value;
+        const semesterKey = `${currentBranch}_${sem}`;
+
+        if (!currentGrades[semesterKey]) {
+            const subjectCount = academicData.branches[currentBranch].semesters[sem].length;
+            currentGrades[semesterKey] = Array(subjectCount).fill("");
+        }
+        currentGrades[semesterKey][index] = grade;
+        localStorage.setItem("currentGrades", JSON.stringify(currentGrades));
+        
+        calculateGPA(sem);
+        debouncedFullUpdate();
+    }
+
+    function calculateGPA(sem) {
+        const gpaResultEl = document.getElementById("gpaResult");
+        const semesterKey = `${currentBranch}_${sem}`;
+        const subjects = academicData.branches[currentBranch].semesters[sem];
+        const activeGrades = currentGrades[semesterKey] || [];
+
+        if (!subjects || subjects.length === 0) {
+            gpaResultEl.style.display = 'none';
+            return;
+        }
+
+        let totalPoints = 0, totalCredits = 0;
+        subjects.forEach((sub, i) => {
+            const grade = activeGrades[i];
+            if (grade) { totalPoints += gradePoints[grade] * sub.credits; totalCredits += sub.credits; }
+        });
+
+        const gpa = totalCredits > 0 ? (totalPoints / totalCredits) : 0;
+        
+        gpaPerSem[semesterKey] = { gpa: parseFloat(gpa.toFixed(2)), credits: totalCredits };
+        localStorage.setItem("gpaPerSem", JSON.stringify(gpaPerSem));
+
+        gpaResultEl.style.display = "block";
+        gpaResultEl.innerHTML = `<div class="result-label" style="font-size: 1.2rem;">Semester ${sem} GPA</div>
+                                 <div class="result-value" style="font-size: 3rem;">${gpa.toFixed(2)}</div>
+                                 <div style="width: 80%; margin: 15px auto 0; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;">
+                                    <div style="height: 100%; background: linear-gradient(90deg, var(--light), #c9d6ff); border-radius: 5px; transition: width 0.5s ease; width: ${(gpa/10)*100}%"></div>
+                                 </div>`;
+    }
+
+    function calculateOverallCGPA() {
+        let totalWeightedGpa = 0, totalCredits = 0;
+        Object.keys(gpaPerSem).filter(k => k.startsWith(currentBranch)).forEach(key => {
+            totalWeightedGpa += gpaPerSem[key].gpa * gpaPerSem[key].credits;
+            totalCredits += gpaPerSem[key].credits;
+        });
+        const cgpa = totalCredits > 0 ? (totalWeightedGpa / totalCredits) : 0;
+        return { cgpa, totalCredits };
+    }
+
+    function updateAllDisplays() {
+        const { cgpa, totalCredits } = calculateOverallCGPA();
+        const arrears = updateArrearsList();
+
+        document.getElementById('summaryCgpaValue').textContent = cgpa.toFixed(2);
+        document.getElementById('summaryCreditsValue').textContent = totalCredits;
+        document.getElementById('summaryArrearsValue').textContent = arrears.count;
+        
+        renderGradeDistributionChart();
+        document.title = `${cgpa.toFixed(2)} CGPA | AJ STUDIOS`;
+    }
+
+    function updateArrearsList() {
+        const arrearsSection = document.getElementById("arrearsSection");
+        const arrearsList = document.getElementById("arrearsList");
+        arrearsList.innerHTML = '';
+        let arrearCount = 0;
+        const sem = document.getElementById("semester").value;
+        if (!sem) { arrearsSection.style.display = "none"; return { count: 0 };}
+
+        const semesterKey = `${currentBranch}_${sem}`;
+        const subjects = academicData.branches[currentBranch].semesters[sem];
+        const grades = currentGrades[semesterKey] || [];
+        const arrearSubjects = [];
+
+        subjects.forEach((sub, i) => {
+            if (grades[i] === 'U') arrearSubjects.push(sub.name);
+        });
+        
+        arrearCount = arrearSubjects.length;
+        if (arrearCount > 0) {
+            arrearsSection.style.display = "block";
+            const fragment = document.createDocumentFragment();
+            arrearSubjects.forEach(name => {
+                const li = document.createElement('li');
+                li.textContent = name;
+                fragment.appendChild(li);
+            });
+            arrearsList.appendChild(fragment);
+        } else {
+            arrearsSection.style.display = "none";
+        }
+        return { count: arrearCount };
+    }
+    
+    // --- Charting & Utilities ---
+    function initCharts() {
+        const commonOptions = { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false };
+        if (gradeDistSummaryChart) gradeDistSummaryChart.destroy();
+        gradeDistSummaryChart = new Chart(document.getElementById('gradeDistSummaryChart').getContext('2d'), { type: 'pie', data: {}, options: commonOptions });
+    }
+    function renderGradeDistributionChart() {
+        if (!currentBranch || !gradeDistSummaryChart) return;
+        const sem = document.getElementById("semester").value;
+        const key = `${currentBranch}_${sem}`;
+        const grades = currentGrades[key] || [];
+        const counts = {};
+        grades.filter(g => g).forEach(g => { counts[g] = (counts[g] || 0) + 1; });
+        
+        gradeDistSummaryChart.data = {
+            labels: Object.keys(counts),
+            datasets: [{ data: Object.values(counts), backgroundColor: ['#00b09b', '#4ECDC4', '#8BC34A', '#CDDC39', '#FFC107', '#FF9800', '#ff416c'] }]
+        };
+        gradeDistSummaryChart.update();
+    }
+    function toggleDarkMode() { document.body.classList.toggle('dark-mode'); localStorage.setItem('darkMode', document.body.classList.contains('dark-mode') ? 'enabled' : 'disabled'); document.getElementById('themeToggle').innerHTML = document.body.classList.contains('dark-mode') ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>'; initCharts(); updateAllDisplays(true); }
+    function resetCalculator() { if (confirm("Are you sure? This will clear all saved data.")) { localStorage.clear(); location.reload(); } }
     </script>
 </body>
 </html>
