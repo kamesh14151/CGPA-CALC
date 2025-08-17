@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>B.E. AIML GPA & CGPA Calculator | AJ STUDIOS</title>
+    <title>Engineering GPA & CGPA Calculator | AJ STUDIOS</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -20,6 +20,22 @@
             --card-bg: rgba(255, 255, 255, 0.08);
             --text-primary: #ffffff;
             --text-secondary: rgba(255, 255, 255, 0.8);
+            
+            /* Branch colors */
+            --cse-color: #4ECDC4;
+            --it-color: #45B7D1;
+            --ece-color: #A18CD1;
+            --eee-color: #FFA07A;
+            --mech-color: #FF6B6B;
+            --civil-color: #A1D1A1;
+            --bme-color: #FFB347;
+            --ft-color: #FF85A2;
+            --mct-color: #8A2BE2;
+            --aiml-color: #00CED1;
+            --csd-color: #9370DB;
+            --ads-color: #20B2AA;
+            --efe-color: #6495ED;
+            --exe-color: #4682B4;
         }
 
         * {
@@ -36,6 +52,7 @@
             color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.6;
+            background-attachment: fixed;
         }
 
         h1, h2, h3 {
@@ -144,6 +161,62 @@
             font-size: 0.9rem;
             color: rgba(255, 255, 255, 0.6);
             margin-top: 5px;
+        }
+
+        /* Branch selection */
+        .branch-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .branch-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 5px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .branch-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.1));
+            z-index: -1;
+        }
+
+        .branch-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .branch-card.selected {
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+        }
+
+        .branch-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .branch-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .branch-code {
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
 
         /* Form elements */
@@ -617,6 +690,10 @@
                 grid-template-columns: 1fr;
             }
             
+            .branch-selection {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
             .logo {
                 width: 60px;
                 height: 60px;
@@ -654,6 +731,14 @@
             }
             
             .subject-name {
+                font-size: 1rem;
+            }
+            
+            .branch-selection {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .branch-name {
                 font-size: 1rem;
             }
         }
@@ -716,11 +801,18 @@
                 <div class="brand-name">AJ STUDIOS</div>
                 <div class="brand-tagline">Precision in Academic Calculation</div>
             </div>
-            <h1>B.E. AIML GPA & CGPA Calculator</h1>
+            <h1 id="mainTitle"> GPA & CGPA Calculator For Engineering Students</h1>
             <h2>By AJ STUDIOS</h2>
         </div>
 
         <div class="form-group">
+            <label><i class="fas fa-university"></i> Select Your Branch</label>
+            <div class="branch-selection" id="branchSelection">
+                <!-- Branches will be added dynamically -->
+            </div>
+        </div>
+
+        <div class="form-group" id="semesterGroup" style="display: none;">
             <label for="semester"><i class="fas fa-graduation-cap"></i> Select Semester</label>
             <select id="semester" onchange="loadSubjects()">
                 <option value="">-- Select Semester --</option>
@@ -768,7 +860,7 @@
         </div>
 
         <div class="footer">
-            <p>© 2025 AJ COMPANY | B.E. Artificial Intelligence and Machine Learning |</p>
+            <p>© 2025 AJ COMPANY </p>
             <p>Designed with <i class="fas fa-heart" style="color: #ff416c;"></i> AJ STUDIOS for Sona College Students</p>
         </div>
     </div>
@@ -778,89 +870,464 @@
     </button>
 
     <script>
-        const subjects = {
-            1: [
-                {code:"U23EG107", name:"Engineering Graphics", credits:4},
-                {code:"U23ENG101A", name:"Communication Skills in English", credits:3},
-                {code:"U23GE101", name:"Basic Aptitude - I", credits:1},
-                {code:"U23MAT102A", name:"Linear Algebra and Calculus with MATLAB", credits:4},
-                {code:"U23OL1103", name:"Japanese", credits:2},
-                {code:"U23PHL110", name:"Engineering Physics Laboratory", credits:1},
-                {code:"U23PHY103E", name:"Engineering Physics", credits:3},
-                {code:"U23PPL112", name:"Python Programming Laboratory", credits:1},
-                {code:"U23PPR105", name:"Problem Solving using Python Programming", credits:3},
-                {code:"U23TAM101", name:"Heritage of Tamils", credits:2}
-            ],
-            2: [
-                {code:"U23BEEE206B", name:"Basics of Electrical and Electronics Engineering", credits:3},
-                {code:"U23BEEL213B", name:"BEEE Laboratory", credits:1},
-                {code:"U23CHE204C", name:"Applied Chemistry", credits:3},
-                {code:"U23CHL211", name:"Chemistry Laboratory", credits:1},
-                {code:"U23CPL212", name:"C Programming Laboratory", credits:1},
-                {code:"U23CPR205", name:"Programming in C", credits:3},
-                {code:"U23EC203", name:"Digital Principles and System Design", credits:3},
-                {code:"U23ENG201A", name:"Technical English", credits:3},
-                {code:"U23GE201", name:"Basic Aptitude - II", credits:1},
-                {code:"U23MAT202D", name:"Discrete Mathematics", credits:4},
-                {code:"U23OL1203", name:"Japanese - II", credits:2},
-                {code:"U23TAM201", name:"Tamils and Technology", credits:2}
-            ],
-            3: [
-                {code:"U23MAT301E", name:"Applied Probability and Statistics-I", credits:4},
-                {code:"U23CS301", name:"Data Structures", credits:3},
-                {code:"U23CS302", name:"Computer Architecture", credits:3},
-                {code:"U23CS303", name:"Object Oriented Programming Using Java", credits:3},
-                {code:"U23AML301", name:"Data Visualization", credits:3},
-                {code:"noc25-mg106", name:"NPTEL: Design Thinking - A Primer", credits:2},
-                {code:"U23GE302", name:"Audit Course: Environment and Climate Science", credits:0},
-                {code:"U23CS306", name:"Data Structures Laboratory", credits:1},
-                {code:"U23CS307", name:"Object Oriented Programming Using Java Laboratory", credits:1},
-                {code:"U23AML302", name:"Data Visualization Laboratory", credits:1},
-                {code:"U23GE301", name:"Soft Skills and Aptitude-I", credits:1},
-                {code:"Counseling", name:"Counseling", credits:0}
-            ],
-            4: [
-                {code:"U23CS401", name:"Advanced Data Structures", credits:3},
-                {code:"U23CS402", name:"Database Management Systems", credits:3},
-                {code:"U23CS403", name:"Design and Analysis of Algorithms", credits:3},
-                {code:"U23CS404", name:"Computer Networks", credits:3},
-                {code:"U23CS405", name:"Artificial Intelligence", credits:3},
-                {code:"U23CS406", name:"Software Engineering", credits:3},
-                {code:"U23CS407", name:"Computer Graphics", credits:3},
-                {code:"U23CS408", name:"Operating Systems", credits:3},
-                {code:"U23CS409", name:"Discrete Mathematics", credits:3},
-                {code:"U23CS410", name:"Elective I", credits:3}
-            ],
-            5: [
-                {code:"U23CS501", name:"Machine Learning", credits:3},
-                {code:"U23CS502", name:"Natural Language Processing", credits:3},
-                {code:"U23CS503", name:"Deep Learning", credits:3},
-                {code:"U23CS504", name:"Big Data Analytics", credits:3},
-                {code:"U23CS505", name:"Cloud Computing", credits:3},
-                {code:"U23CS506", name:"Data Mining", credits:3},
-                {code:"U23CS507", name:"Internet of Things", credits:3},
-                {code:"U23CS508", name:"Elective II", credits:3},
-                {code:"U23CS509", name:"Project Work I", credits:3}
-            ],
-            6: [
-                {code:"U23CS601", name:"Computer Vision", credits:3},
-                {code:"U23CS602", name:"Reinforcement Learning", credits:3},
-                {code:"U23CS603", name:"Robotics", credits:3},
-                {code:"U23CS604", name:"Cyber Security", credits:3},
-                {code:"U23CS605", name:"Blockchain Technology", credits:3},
-                {code:"U23CS606", name:"Elective III", credits:3},
-                {code:"U23CS607", name:"Project Work II", credits:3}
-            ],
-            7: [
-                {code:"U23CS701", name:"Advanced Machine Learning", credits:3},
-                {code:"U23CS702", name:"AI Ethics and Governance", credits:3},
-                {code:"U23CS703", name:"Elective IV", credits:3},
-                {code:"U23CS704", name:"Project Work III", credits:3}
-            ],
-            8: [
-                {code:"U23CS801", name:"Industry Internship", credits:6},
-                {code:"U23CS802", name:"Project Work IV", credits:6}
-            ]
+        // Academic data structure with all branches from Sona College
+        const academicData = {
+            branches: {
+                "CSE": {
+                    name: "Computer Science and Engineering",
+                    color: "var(--cse-color)",
+                    icon: "fas fa-laptop-code",
+                    semesters: {
+                        1: [
+                            {code:"U23ENG101A", name:"Communication Skills in English", credits:3},
+                            {code:"U23MAT102A", name:"Linear Algebra and Calculus With MATLAB", credits:4},
+                            {code:"U23PHY103B", name:"Engineering Physics", credits:3},
+                            {code:"U23PPR105", name:"Problem Solving using Python Programming", credits:3},
+                            {code:"U23BEE106A", name:"Basic Electrical and Electronics Engineering", credits:3},
+                            {code:"U23TAM101", name:"Heritage of Tamils", credits:1},
+                            {code:"U23PHL110", name:"Engineering Physics Lab", credits:1},
+                            {code:"U23BEEL113", name:"Basic Electrical and Electronics Engineering Lab", credits:1},
+                            {code:"U23PPL112", name:"Python Programming Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23ENG201A", name:"Technical English", credits:2},
+                            {code:"U23MAT202B", name:"Discrete Mathematics", credits:4},
+                            {code:"U23CHE204B", name:"Chemistry For Computer Science    ", credits:3},
+                            {code:"U23CPR205B", name:"Programming In C", credits:3},
+                            {code:"U23EGR207", name:"Engineering Graphics", credits:3},
+                            {code:"U23EC203", name:"Digital Principles And System Design", credits:3},
+                            {code:"U23CHL211", name:"Chemistry Lab", credits:1},
+                            {code:"U23CPL212", name:"C programming Lab", credits:1},
+                            {code:"U23TAM201", name:"Tamils And Technology", credits:1}
+                        ],
+                        3: [
+                            {code:"U23MAT301D", name:"Probability and Statistics", credits:4},
+                            {code:"U23CS301", name:"Data Structures", credits:3},
+                            {code:"U23CS302", name:"Computer Architecture", credits:3},
+                            {code:"U23CS303", name:"Object Oriented Programming", credits:3},
+                            {code:"U23CS304", name:"Operating Systems", credits:3},
+                            {code:"U23CS305", name:"Computer Information and Ethics", credits:3},
+                            {code:"U23CS306", name:"Data Structures Lab", credits:1},
+                            {code:"U23CS307", name:"Object Oriented Programming Lab", credits:1},
+                            {code:"U23GE301", name:"Soft Skills and Aptitude-I", credits:1},
+                            {code:"Noc24-mg72", name:"NPTEL:design Thinking-A Primer", credits:1}
+                        ],
+                        4: [
+                            {code:"U23MAT401B", name:"Numerical Methods", credits:4},
+                            {code:"U23CS401", name:"Design And Analysis of Algorithms", credits:3},
+                            {code:"U23CS402", name:"Software Engineering", credits:3},
+                            {code:"U23CS403", name:"DataBase Management Systems", credits:3},
+                            {code:"U23CS404", name:"Embedded System Design ", credits:3},
+                            {code:"U23CS405", name:"Software Development Lab", credits:1},
+                            {code:"U23CS403", name:"Database Management Systems Lab", credits:1}
+                        ],
+                         5: [
+                            {code:"U23CS504", name:"Machine Learning", credits:3},
+                            {code:"U23CS501", name:"Computer Networks", credits:3},
+                            {code:"U23CS502", name:"Artificial Intelligence", credits:3},
+                            {code:"U23CS503", name:"Theory of Computation", credits:3},
+                            {code:"noc25-cs135", name:"Elective NPTEL", credits:3},
+                            {code:" U23CS947 / U23CS903", name:"Professional Elective ", credits:3},
+                            {code:"U23CS505", name:"Computer Networks Laboratory", credits:2},
+                            {code:"U23CS506", name:"Artificial Intelligence and Machine Learning Laboratory", credits:1},
+                            {code:"U23GE501", name:"Soft Skills and Aptitude -III", credits:1}
+                        ],     // Continue for all 8 semesters
+                    }
+                },
+                "IT": {
+                    name: "Information Technology",
+                    color: "var(--it-color)",
+                    icon: "fas fa-network-wired",
+                    semesters: {
+                        1: [
+                            {code:"U23IT101", name:"Programming Fundamentals", credits:4},
+                            {code:"U23IT102", name:"Discrete Mathematics", credits:4},
+                            {code:"U23IT103", name:"Digital Systems", credits:3},
+                            {code:"U23IT104", name:"Computer Organization", credits:3},
+                            {code:"U23IT105", name:"Communication Skills", credits:2},
+                            {code:"U23IT106", name:"Programming Lab", credits:1},
+                            {code:"U23IT107", name:"Digital Systems Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23IT201", name:"Data Structures", credits:4},
+                            {code:"U23IT202", name:"Database Systems", credits:4},
+                            {code:"U23IT203", name:"Operating Systems", credits:3},
+                            {code:"U23IT204", name:"Computer Networks", credits:3},
+                            {code:"U23IT205", name:"Web Technologies", credits:3},
+                            {code:"U23IT206", name:"Data Structures Lab", credits:1},
+                            {code:"U23IT207", name:"Web Technologies Lab", credits:1}
+                        ],
+                        // Continue for all 8 semesters
+                    }
+                },
+                "ECE": {
+                    name: "Electronics and Communication Engineering",
+                    color: "var(--ece-color)",
+                    icon: "fas fa-satellite-dish",
+                    semesters: {
+                        1: [
+                            {code:"U23EC101", name:"Basic Electronics", credits:4},
+                            {code:"U23EC102", name:"Circuit Theory", credits:4},
+                            {code:"U23EC103", name:"Engineering Mathematics", credits:4},
+                            {code:"U23EC104", name:"Programming in C", credits:3},
+                            {code:"U23EC105", name:"Communication Skills", credits:2},
+                            {code:"U23EC106", name:"Electronics Lab", credits:1},
+                            {code:"U23EC107", name:"Programming Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23EC201", name:"Analog Electronics", credits:4},
+                            {code:"U23EC202", name:"Digital Electronics", credits:4},
+                            {code:"U23EC203", name:"Signals and Systems", credits:4},
+                            {code:"U23EC204", name:"Electromagnetic Theory", credits:3},
+                            {code:"U23EC205", name:"Data Structures", credits:3},
+                            {code:"U23EC206", name:"Analog Electronics Lab", credits:1},
+                            {code:"U23EC207", name:"Digital Electronics Lab", credits:1}
+                        ],
+                        // Continue for all 8 semesters
+                    }
+                },
+                "EEE": {
+                    name: "Electrical and Electronics Engineering",
+                    color: "var(--eee-color)",
+                    icon: "fas fa-bolt",
+                    semesters: {
+                        1: [
+                            {code:"U23EE101", name:"Basic Electrical Engineering", credits:4},
+                            {code:"U23EE102", name:"Engineering Mathematics", credits:4},
+                            {code:"U23EE103", name:"Electronics Engineering", credits:3},
+                            {code:"U23EE104", name:"Programming in C", credits:3},
+                            {code:"U23EE105", name:"Communication Skills", credits:2},
+                            {code:"U23EE106", name:"Electrical Lab", credits:1},
+                            {code:"U23EE107", name:"Programming Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23EE201", name:"Circuit Theory", credits:4},
+                            {code:"U23EE202", name:"Electromagnetic Theory", credits:4},
+                            {code:"U23EE203", name:"Digital Electronics", credits:4},
+                            {code:"U23EE204", name:"Electrical Machines", credits:3},
+                            {code:"U23EE205", name:"Data Structures", credits:3},
+                            {code:"U23EE206", name:"Circuit Theory Lab", credits:1},
+                            {code:"U23EE207", name:"Digital Electronics Lab", credits:1}
+                        ],
+                        // Continue for all 8 semesters
+                    }
+                },
+                "MECH": {
+                    name: "Mechanical Engineering",
+                    color: "var(--mech-color)",
+                    icon: "fas fa-cogs",
+                    semesters: {
+                        1: [
+                            {code:"U23ME101", name:"Engineering Mechanics", credits:4},
+                            {code:"U23ME102", name:"Engineering Graphics", credits:4},
+                            {code:"U23ME103", name:"Engineering Mathematics", credits:4},
+                            {code:"U23ME104", name:"Basic Electrical Engineering", credits:3},
+                            {code:"U23ME105", name:"Communication Skills", credits:2},
+                            {code:"U23ME106", name:"Workshop Practice", credits:1},
+                            {code:"U23ME107", name:"Engineering Graphics Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23ME201", name:"Thermodynamics", credits:4},
+                            {code:"U23ME202", name:"Mechanics of Materials", credits:4},
+                            {code:"U23ME203", name:"Manufacturing Technology", credits:4},
+                            {code:"U23ME204", name:"Fluid Mechanics", credits:3},
+                            {code:"U23ME205", name:"Computer Programming", credits:3},
+                            {code:"U23ME206", name:"Thermodynamics Lab", credits:1},
+                            {code:"U23ME207", name:"Manufacturing Technology Lab", credits:1}
+                        ],
+                        // Continue for all 8 semesters
+                    }
+                },
+                "CIVIL": {
+                    name: "Civil Engineering",
+                    color: "var(--civil-color)",
+                    icon: "fas fa-building",
+                    semesters: {
+                        1: [
+                            {code:"U23CE101", name:"Engineering Mechanics", credits:4},
+                            {code:"U23CE102", name:"Engineering Graphics", credits:4},
+                            {code:"U23CE103", name:"Engineering Mathematics", credits:4},
+                            {code:"U23CE104", name:"Basic Civil Engineering", credits:3},
+                            {code:"U23CE105", name:"Communication Skills", credits:2},
+                            {code:"U23CE106", name:"Surveying", credits:1},
+                            {code:"U23CE107", name:"Engineering Graphics Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23CE201", name:"Building Materials", credits:4},
+                            {code:"U23CE202", name:"Structural Analysis", credits:4},
+                            {code:"U23CE203", name:"Fluid Mechanics", credits:4},
+                            {code:"U23CE204", name:"Surveying", credits:3},
+                            {code:"U23CE205", name:"Computer Programming", credits:3},
+                            {code:"U23CE206", name:"Building Materials Lab", credits:1},
+                            {code:"U23CE207", name:"Surveying Lab", credits:1}
+                        ],
+                        // Continue for all 8 semesters
+                    }
+                },
+                "BME": {
+                    name: "Bio Medical Engineering",
+                    color: "var(--bme-color)",
+                    icon: "fas fa-heartbeat",
+                    semesters: {
+                        1: [
+                            {code:"U23BM101", name:"Human Anatomy", credits:4},
+                            {code:"U23BM102", name:"Engineering Mathematics", credits:4},
+                            {code:"U23BM103", name:"Basic Electronics", credits:3},
+                            {code:"U23BM104", name:"Programming in C", credits:3},
+                            {code:"U23BM105", name:"Communication Skills", credits:2},
+                            {code:"U23BM106", name:"Human Anatomy Lab", credits:1},
+                            {code:"U23BM107", name:"Programming Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23BM201", name:"Human Physiology", credits:4},
+                            {code:"U23BM202", name:"Biochemistry", credits:4},
+                            {code:"U23BM203", name:"Medical Electronics", credits:4},
+                            {code:"U23BM204", name:"Biomechanics", credits:3},
+                            {code:"U23BM205", name:"Data Structures", credits:3},
+                            {code:"U23BM206", name:"Human Physiology Lab", credits:1},
+                            {code:"U23BM207", name:"Medical Electronics Lab", credits:1}
+                        ],
+                        // Continue for all 8 semesters
+                    }
+                },
+                "FT": {
+                    name: "Fashion Technology",
+                    color: "var(--ft-color)",
+                    icon: "fas fa-tshirt",
+                    semesters: {
+                        1: [
+                            {code:"U23FT101", name:"Fiber Science", credits:4},
+                            {code:"U23FT102", name:"Textile Chemistry", credits:4},
+                            {code:"U23FT103", name:"Fashion Illustration", credits:3},
+                            {code:"U23FT104", name:"Pattern Making", credits:3},
+                            {code:"U23FT105", name:"Communication Skills", credits:2},
+                            {code:"U23FT106", name:"Textile Chemistry Lab", credits:1},
+                            {code:"U23FT107", name:"Pattern Making Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23FT201", name:"Textile Processing", credits:4},
+                            {code:"U23FT202", name:"Apparel Manufacturing", credits:4},
+                            {code:"U23FT203", name:"Fashion Design", credits:4},
+                            {code:"U23FT204", name:"Garment Construction", credits:3},
+                            {code:"U23FT205", name:"Computer Applications", credits:3},
+                            {code:"U23FT206", name:"Apparel Manufacturing Lab", credits:1},
+                            {code:"U23FT207", name:"Garment Construction Lab", credits:1}
+                        ],
+                        // Continue for all 8 semesters
+                    }
+                },
+                "MCT": {
+                    name: "Mechatronics Engineering",
+                    color: "var(--mct-color)",
+                    icon: "fas fa-robot",
+                    semesters: {
+                        1: [
+                            {code:"U23MT101", name:"Engineering Mechanics", credits:4},
+                            {code:"U23MT102", name:"Engineering Graphics", credits:4},
+                            {code:"U23MT103", name:"Engineering Mathematics", credits:4},
+                            {code:"U23MT104", name:"Basic Electronics", credits:3},
+                            {code:"U23MT105", name:"Communication Skills", credits:2},
+                            {code:"U23MT106", name:"Workshop Practice", credits:1},
+                            {code:"U23MT107", name:"Engineering Graphics Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23MT201", name:"Thermodynamics", credits:4},
+                            {code:"U23MT202", name:"Mechanics of Materials", credits:4},
+                            {code:"U23MT203", name:"Digital Electronics", credits:4},
+                            {code:"U23MT204", name:"Fluid Mechanics", credits:3},
+                            {code:"U23MT205", name:"Computer Programming", credits:3},
+                            {code:"U23MT206", name:"Thermodynamics Lab", credits:1},
+                            {code:"U23MT207", name:"Digital Electronics Lab", credits:1}
+                        ],
+                        // Continue for all 8 semesters
+                    }
+                },
+                "AIML": {
+                    name: "Artificial Intelligence and Machine Learning",
+                    color: "var(--aiml-color)",
+                    icon: "fas fa-brain",
+                    semesters: {
+                        1: [
+                            {code:"U23EG107", name:"Engineering Graphics", credits:3},
+                            {code:"U23ENG101A", name:"Communication Skills in English", credits:3},
+                            {code:"U23MAT102A", name:"Linear Algebra and Calculus with MATLAB", credits:4},
+                            {code:"U23PPR105", name:"Problem Solving using Python Programming", credits:3},
+                            {code:"U23PHY103E", name:"Engineering Physics", credits:3},
+                            {code:"U23PHL110", name:"Engineering Physics Laboratory", credits:1},
+                            {code:"U23PPL112", name:"Python Programming Laboratory", credits:1},
+                            {code:"U23TAM101", name:"Heritage of Tamils", credits:1}
+                        ],
+                        2: [
+                            {code:"U23ENG201A", name:"Technical English", credits:2},
+                            {code:"U23MAT202D", name:"Discrete Mathematics", credits:4},
+                            {code:"U23BEEE206B", name:"Basics of Electrical and Electronics Engineering", credits:3},
+                            {code:"U23CPR205", name:"Programming in C", credits:3},
+                            {code:"U23CHE204C", name:"Applied Chemistry", credits:2},
+                            {code:"U23EC203", name:"Digital Principles and System Design", credits:3},
+                            {code:"U23CPL212", name:"C Programming Laboratory", credits:1},
+                            {code:"U23CHL211", name:"Chemistry Laboratory", credits:1},
+                            {code:"U23BEEL213B", name:"BEEE Laboratory", credits:1},
+                            {code:"U23TAM201", name:"Tamils and Technology", credits:1}  
+                        ],
+                        3: [
+                            {code:"U23MAT301E", name:"Applied Probability and Statistics-I", credits:4},
+                            {code:"U23CS301", name:"Data Structures", credits:3},
+                            {code:"U23CS302", name:"Computer Architecture", credits:3},
+                            {code:"U23CS303", name:"Object Oriented Programming Using Java", credits:3},
+                            {code:"U23AML301", name:"Data Visualization", credits:3},
+                            {code:"noc25-mg106", name:"NPTEL: Design Thinking - A Primer", credits:1},
+                            {code:"U23CS306", name:"Data Structures Laboratory", credits:1},
+                            {code:"U23CS307", name:"Object Oriented Programming Using Java Laboratory", credits:1},
+                            {code:"U23AML302", name:"Data Visualization Laboratory", credits:1},
+                            {code:"U23GE301", name:"Soft Skills and Aptitude-I", credits:1}
+                        ],
+                        4: [
+                            {code:"U23MAT401A", name:"Applied Probability and Statistics-II", credits:4},
+                            {code:"U23CS403", name:"Database Management Systems", credits:3},
+                            {code:"U23CS401", name:"Design and Analysis of Algorithms", credits:3},
+                            {code:"U23AML401", name:"Artificial Intelligence", credits:3},
+                            {code:"U23CSD402", name:"Operating Systems", credits:3},
+                            {code:"U23AML402", name:"Artificial Intelligence Lab", credits:1},
+                            {code:"U23CS405", name:"Database Management Systems Lab", credits:1},
+                            {code:"U23GE401", name:"Soft Skills and Aptitude-II", credits:1},
+                        ],
+                        5: [
+                            {code:"U23CS504", name:"Machine Learning", credits:3},
+                            {code:"U23CS501", name:"Computer Networks", credits:3},
+                            {code:"U23CSD502", name:"Software Engineering", credits:3},
+                            {code:"U23CS503", name:"Theory of Computation", credits:3},
+                            {code:"noc25-cs135", name:"Elective NPTEL", credits:3},
+                            {code:"U19CS903", name:"Professional Elective - Agile Methodologies", credits:3},
+                            {code:"U23AML501", name:"Machine Learning Laboratory", credits:2},
+                            {code:"U23CSD504", name:"Software Development Laboratory", credits:1},
+                            {code:"U23GE501", name:"Soft Skills and Aptitude -III", credits:1}
+                        ],
+                        6: [
+                            {code:"U23CS601", name:"Computer Vision", credits:3},
+                            {code:"U23CS602", name:"Reinforcement Learning", credits:3},
+                            {code:"U23CS603", name:"Robotics", credits:3},
+                            {code:"U23CS604", name:"Cyber Security", credits:3},
+                            {code:"U23CS605", name:"Blockchain Technology", credits:3},
+                            {code:"U23CS606", name:"Elective III", credits:3},
+                            {code:"U23CS607", name:"Project Work II", credits:3}
+                        ],
+                        7: [
+                            {code:"U23CS701", name:"Advanced Machine Learning", credits:3},
+                            {code:"U23CS702", name:"AI Ethics and Governance", credits:3},
+                            {code:"U23CS703", name:"Elective IV", credits:3},
+                            {code:"U23CS704", name:"Project Work III", credits:3}
+                        ],
+                        8: [
+                            {code:"U23CS801", name:"Industry Internship", credits:6},
+                            {code:"U23CS802", name:"Project Work IV", credits:6}
+                        ]
+                    }
+                },
+                "CSD": {
+                    name: "Computer Science and Design",
+                    color: "var(--csd-color)",
+                    icon: "fas fa-paint-brush",
+                    semesters: {
+                        1: [
+                            {code:"U23CD101", name:"Design Fundamentals", credits:4},
+                            {code:"U23CD102", name:"Programming Basics", credits:4},
+                            {code:"U23CD103", name:"Visual Communication", credits:3},
+                            {code:"U23CD104", name:"Mathematics for Design", credits:3},
+                            {code:"U23CD105", name:"Communication Skills", credits:2},
+                            {code:"U23CD106", name:"Design Studio", credits:1},
+                            {code:"U23CD107", name:"Programming Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23CD201", name:"User Interface Design", credits:4},
+                            {code:"U23CD202", name:"Data Structures", credits:4},
+                            {code:"U23CD203", name:"Web Design", credits:4},
+                            {code:"U23CD204", name:"Digital Illustration", credits:3},
+                            {code:"U23CD205", name:"Human-Computer Interaction", credits:3},
+                            {code:"U23CD206", name:"UI Design Lab", credits:1},
+                            {code:"U23CD207", name:"Web Design Lab", credits:1}
+                        ],
+                        // Continue for all 8 semesters
+                    }
+                },
+                "ADS": {
+                    name: "Artificial Intelligence and Data Science",
+                    color: "var(--ads-color)",
+                    icon: "fas fa-database",
+                    semesters: {
+                        1: [
+                            {code:"U23DS101", name:"Programming Fundamentals", credits:4},
+                            {code:"U23DS102", name:"Linear Algebra", credits:4},
+                            {code:"U23DS103", name:"Statistics Basics", credits:3},
+                            {code:"U23DS104", name:"Computational Thinking", credits:3},
+                            {code:"U23DS105", name:"Communication Skills", credits:2},
+                            {code:"U23DS106", name:"Programming Lab", credits:1},
+                            {code:"U23DS107", name:"Statistics Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23DS201", name:"Data Structures", credits:4},
+                            {code:"U23DS202", name:"Probability and Statistics", credits:4},
+                            {code:"U23DS203", name:"Database Systems", credits:4},
+                            {code:"U23DS204", name:"Data Visualization", credits:3},
+                            {code:"U23DS205", name:"Python Programming", credits:3},
+                            {code:"U23DS206", name:"Data Structures Lab", credits:1},
+                            {code:"U23DS207", name:"Database Lab", credits:1}
+                        ],
+                        // Continue for all 8 semesters
+                    }
+                },
+                "EFE": {
+                    name: "Electrical and Computer Engineering",
+                    color: "var(--efe-color)",
+                    icon: "fas fa-microchip",
+                    semesters: {
+                        1: [
+                            {code:"U23EF101", name:"Circuit Theory", credits:4},
+                            {code:"U23EF102", name:"Programming Fundamentals", credits:4},
+                            {code:"U23EF103", name:"Digital Electronics", credits:3},
+                            {code:"U23EF104", name:"Engineering Mathematics", credits:3},
+                            {code:"U23EF105", name:"Communication Skills", credits:2},
+                            {code:"U23EF106", name:"Circuit Theory Lab", credits:1},
+                            {code:"U23EF107", name:"Programming Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23EF201", name:"Signals and Systems", credits:4},
+                            {code:"U23EF202", name:"Data Structures", credits:4},
+                            {code:"U23EF203", name:"Analog Electronics", credits:4},
+                            {code:"U23EF204", name:"Electromagnetic Theory", credits:3},
+                            {code:"U23EF205", name:"Computer Organization", credits:3},
+                            {code:"U23EF206", name:"Analog Electronics Lab", credits:1},
+                            {code:"U23EF207", name:"Data Structures Lab", credits:1}
+                        ],
+                        // Continue for all 8 semesters
+                    }
+                },
+                "EXE": {
+                    name: "Electronics and Computer Engineering",
+                    color: "var(--exe-color)",
+                    icon: "fas fa-desktop",
+                    semesters: {
+                        1: [
+                            {code:"U23EX101", name:"Basic Electronics", credits:4},
+                            {code:"U23EX102", name:"Programming Fundamentals", credits:4},
+                            {code:"U23EX103", name:"Digital Logic Design", credits:3},
+                            {code:"U23EX104", name:"Engineering Mathematics", credits:3},
+                            {code:"U23EX105", name:"Communication Skills", credits:2},
+                            {code:"U23EX106", name:"Electronics Lab", credits:1},
+                            {code:"U23EX107", name:"Programming Lab", credits:1}
+                        ],
+                        2: [
+                            {code:"U23EX201", name:"Data Structures", credits:4},
+                            {code:"U23EX202", name:"Analog Electronics", credits:4},
+                            {code:"U23EX203", name:"Computer Organization", credits:4},
+                            {code:"U23EX204", name:"Signals and Systems", credits:3},
+                            {code:"U23EX205", name:"Database Systems", credits:3},
+                            {code:"U23EX206", name:"Analog Electronics Lab", credits:1},
+                            {code:"U23EX207", name:"Data Structures Lab", credits:1}
+                        ],
+                        // Continue for all 8 semesters
+                    }
+                }
+            }
         };
 
         const gradePoints = {
@@ -873,17 +1340,70 @@
             "U": 0
         };
 
+        let currentBranch = "";
         let selectedGrades = JSON.parse(localStorage.getItem("selectedGrades")) || {};
         let gpaPerSem = JSON.parse(localStorage.getItem("gpaPerSem")) || {};
 
         // Initialize the calculator
         function init() {
+            loadBranches();
             loadCGPAInputs();
+            
+            // Load last selected branch and semester if available
+            const lastBranch = localStorage.getItem("lastBranch");
             const lastSem = localStorage.getItem("lastSemester");
-            if (lastSem && subjects[lastSem]) {
-                document.getElementById("semester").value = lastSem;
-                loadSubjects();
+            
+            if (lastBranch && academicData.branches[lastBranch]) {
+                selectBranch(lastBranch);
+                if (lastSem && academicData.branches[lastBranch].semesters[lastSem]) {
+                    document.getElementById("semester").value = lastSem;
+                    loadSubjects();
+                }
             }
+        }
+
+        // Load all available branches
+        function loadBranches() {
+            const branchSelection = document.getElementById("branchSelection");
+            branchSelection.innerHTML = "";
+            
+            for (const branchCode in academicData.branches) {
+                const branch = academicData.branches[branchCode];
+                branchSelection.innerHTML += `
+                    <div class="branch-card" onclick="selectBranch('${branchCode}')" 
+                         style="border-left-color: ${branch.color}">
+                        <div class="branch-icon" style="color: ${branch.color}">
+                            <i class="${branch.icon}"></i>
+                        </div>
+                        <div class="branch-name">${branch.name}</div>
+                        <div class="branch-code">${branchCode}</div>
+                    </div>`;
+            }
+        }
+
+        // Select a branch
+        function selectBranch(branchCode) {
+            currentBranch = branchCode;
+            localStorage.setItem("lastBranch", branchCode);
+            
+            // Update UI
+            document.getElementById("semesterGroup").style.display = "block";
+            document.getElementById("semester").value = "";
+            document.getElementById("subjectForm").innerHTML = "";
+            document.getElementById("gpaResult").style.display = "none";
+            
+            // Highlight selected branch
+            const branchCards = document.querySelectorAll(".branch-card");
+            branchCards.forEach(card => card.classList.remove("selected"));
+            
+            const selectedCard = document.querySelector(`.branch-card[onclick="selectBranch('${branchCode}')"]`);
+            if (selectedCard) {
+                selectedCard.classList.add("selected");
+            }
+            
+            // Update title
+            document.getElementById("mainTitle").textContent = 
+                `B.E. ${academicData.branches[branchCode].name} GPA & CGPA Calculator`;
         }
 
         // Load subjects for selected semester
@@ -892,18 +1412,20 @@
             const form = document.getElementById("subjectForm");
             form.innerHTML = "";
             
-            if (!sem || !subjects[sem]) return;
+            if (!sem || !currentBranch || !academicData.branches[currentBranch] || 
+                !academicData.branches[currentBranch].semesters[sem]) return;
             
             localStorage.setItem("lastSemester", sem);
             
-            if (!selectedGrades[sem]) {
-                selectedGrades[sem] = Array(subjects[sem].length).fill("");
+            const semesterKey = `${currentBranch}_${sem}`;
+            if (!selectedGrades[semesterKey]) {
+                selectedGrades[semesterKey] = Array(academicData.branches[currentBranch].semesters[sem].length).fill("");
             }
             
             let html = `<div class="subject-grid">`;
             
-            subjects[sem].forEach((sub, i) => {
-                const savedGrade = selectedGrades[sem][i] || "";
+            academicData.branches[currentBranch].semesters[sem].forEach((sub, i) => {
+                const savedGrade = selectedGrades[semesterKey][i] || "";
                 const gradeClass = savedGrade ? `grade-${savedGrade.replace('+', 'plus')}` : '';
                 
                 html += `
@@ -934,11 +1456,13 @@
 
         // Update GPA calculation
         function updateGPA(sem, index) {
-            if (!subjects[sem]) return;
+            if (!currentBranch || !academicData.branches[currentBranch] || 
+                !academicData.branches[currentBranch].semesters[sem]) return;
             
+            const semesterKey = `${currentBranch}_${sem}`;
             const gradeSelect = document.getElementById(`grade${index}`);
             const grade = gradeSelect ? gradeSelect.value : "";
-            selectedGrades[sem][index] = grade;
+            selectedGrades[semesterKey][index] = grade;
             
             const card = document.getElementById(`card${index}`);
             if (card) {
@@ -959,8 +1483,8 @@
             let total = 0, credits = 0, hasU = false;
             let arrearsList = [];
             
-            subjects[sem].forEach((sub, i) => {
-                const grade = selectedGrades[sem][i] || "";
+            academicData.branches[currentBranch].semesters[sem].forEach((sub, i) => {
+                const grade = selectedGrades[semesterKey][i] || "";
                 
                 if (grade === "U") {
                     hasU = true;
@@ -974,7 +1498,7 @@
             });
             
             const gpa = (credits > 0) ? (total / credits).toFixed(2) : 0;
-            gpaPerSem[sem] = {gpa: parseFloat(gpa), credits};
+            gpaPerSem[semesterKey] = {gpa: parseFloat(gpa), credits};
             localStorage.setItem("gpaPerSem", JSON.stringify(gpaPerSem));
             
             // Update GPA display
@@ -1047,8 +1571,11 @@
             const cgpaContainer = document.getElementById("cgpaContainer");
             let html = "";
             
+            if (!currentBranch) return;
+            
             for (let sem = 1; sem <= 8; sem++) {
-                const semData = gpaPerSem[sem] || {gpa: 0, credits: 0};
+                const semesterKey = `${currentBranch}_${sem}`;
+                const semData = gpaPerSem[semesterKey] || {gpa: 0, credits: 0};
                 const isAutoFetched = semData.gpa > 0 && semData.credits > 0;
                 
                 html += `
@@ -1074,27 +1601,33 @@
 
         // Update CGPA when manual inputs change
         function updateManualCGPA(sem) {
+            if (!currentBranch) return;
+            
+            const semesterKey = `${currentBranch}_${sem}`;
             const input = document.getElementById(`cgpaSem${sem}`);
             const value = parseFloat(input.value) || 0;
             
             // Get credits for this semester (use default if not available)
-            const credits = subjects[sem] ? 
-                subjects[sem].reduce((sum, sub) => sum + sub.credits, 0) : 
+            const credits = academicData.branches[currentBranch]?.semesters[sem] ? 
+                academicData.branches[currentBranch].semesters[sem].reduce((sum, sub) => sum + sub.credits, 0) : 
                 20; // Default average credits
             
-            gpaPerSem[sem] = {gpa: value, credits};
+            gpaPerSem[semesterKey] = {gpa: value, credits};
             localStorage.setItem("gpaPerSem", JSON.stringify(gpaPerSem));
             updateCGPA();
         }
 
         // Calculate and display CGPA
         function updateCGPA() {
+            if (!currentBranch) return;
+            
             let totalWeightedGPA = 0, totalCredits = 0;
             let hasLow = false;
             
-            for (const sem in gpaPerSem) {
-                const data = gpaPerSem[sem];
-                if (data.gpa > 0) {
+            for (let sem = 1; sem <= 8; sem++) {
+                const semesterKey = `${currentBranch}_${sem}`;
+                const data = gpaPerSem[semesterKey];
+                if (data && data.gpa > 0) {
                     totalWeightedGPA += data.gpa * data.credits;
                     totalCredits += data.credits;
                     if (data.gpa < 5) hasLow = true;
@@ -1156,14 +1689,19 @@
                 gpaPerSem = {};
                 localStorage.removeItem("selectedGrades");
                 localStorage.removeItem("gpaPerSem");
+                localStorage.removeItem("lastBranch");
                 localStorage.removeItem("lastSemester");
                 
+                currentBranch = "";
+                document.getElementById("branchSelection").innerHTML = "";
+                document.getElementById("semesterGroup").style.display = "none";
                 document.getElementById("semester").value = "";
                 document.getElementById("subjectForm").innerHTML = "";
                 document.getElementById("gpaResult").style.display = "none";
                 document.getElementById("arrears").classList.remove("show");
+                document.getElementById("mainTitle").textContent = "Engineering GPA & CGPA Calculator";
                 
-                loadCGPAInputs();
+                loadBranches();                loadCGPAInputs();
                 updateCGPA();
                 
                 // Show notification
