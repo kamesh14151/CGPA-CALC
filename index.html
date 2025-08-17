@@ -23,12 +23,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         @keyframes background-pan { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes stagger-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* --- NEW: Continuous Shimmer Animation --- */
-        @keyframes shimmer {
-            0% { background-position: -200% center; }
-            100% { background-position: 200% center; }
-        }
+        @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
 
         body {
             font-family: "Poppins", sans-serif; background: linear-gradient(135deg, var(--dark), #1a1a2e);
@@ -41,15 +36,9 @@
         .logo i { font-size: 1.8rem; color: white; }
         
         .animated-brand {
-            font-size: 1.5rem;
-            font-weight: 600;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
+            font-size: 1.5rem; font-weight: 600; letter-spacing: 2px; margin-bottom: 10px;
             background: linear-gradient(120deg, var(--primary) 20%, var(--secondary) 40%, var(--light) 50%, var(--secondary) 60%, var(--primary) 80%);
-            background-size: 200% auto;
-            color: transparent;
-            -webkit-background-clip: text;
-            background-clip: text;
+            background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text;
             animation: shimmer 4s linear infinite;
         }
         
@@ -94,10 +83,21 @@
         .footer p { margin: 5px 0; }
         .footer .brand-main { font-weight: 600; color: var(--text-primary); }
         
+        /* --- RESPONSIVE STYLES --- */
         @media (max-width: 1024px) {
             .dashboard-layout { grid-template-columns: 1fr; }
-            .header, .container { padding: 15px; }
+            .container { padding: 20px; margin: 20px; }
+            h1 { font-size: 2rem; }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 15px; margin: 15px; }
             h1 { font-size: 1.8rem; }
+            .animated-brand { font-size: 1.2rem; }
+            .logo { width: 50px; height: 50px; }
+            .logo i { font-size: 1.5rem; }
+            .summary-card .value { font-size: 1.8rem; }
+            .subject-card { padding: 12px; }
         }
     </style>
 </head>
@@ -188,6 +188,7 @@
             "EXE":{"name":"Electronics & Computer","color":"var(--exe-color)","icon":"fas fa-desktop","semesters":{"1":[{"code":"U23EX101","name":"Basic Electronics","credits":4},{"code":"U23EX102","name":"Programming Fundamentals","credits":4},{"code":"U23EX103","name":"Digital Logic Design","credits":3},{"code":"U23EX104","name":"Engineering Mathematics","credits":3},{"code":"U23EX105","name":"Communication Skills","credits":2},{"code":"U23EX106","name":"Electronics Lab","credits":1},{"code":"U23EX107","name":"Programming Lab","credits":1}],"2":[{"code":"U23EX201","name":"Data Structures","credits":4},{"code":"U23EX202","name":"Analog Electronics","credits":4},{"code":"U23EX203","name":"Computer Organization","credits":4},{"code":"U23EX204","name":"Signals and Systems","credits":3},{"code":"U23EX205","name":"Database Systems","credits":3},{"code":"U23EX206","name":"Analog Electronics Lab","credits":1},{"code":"U23EX207","name":"Data Structures Lab","credits":1}]}}}
     };
 
+    // --- App Initialisation & State Management ---
     const gradePoints = { "O": 10, "A+": 9, "A": 8, "B+": 7, "B": 6, "C": 5, "U": 0 };
     let currentBranch = "", currentGrades = {}, gpaPerSem = {}, gradeDistSummaryChart;
     const debounce = (func, delay) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; };
