@@ -6,6 +6,8 @@
     <title>Engineering GPA & CGPA Calculator | AJ STUDIOS</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --primary: #6a11cb;
@@ -38,6 +40,19 @@
             --exe-color: #4682B4;
         }
 
+        /* Dark mode variables */
+        .dark-mode {
+            --primary: #8a2be2;
+            --primary-dark: #6a11cb;
+            --secondary: #4169e1;
+            --secondary-dark: #1a5fd3;
+            --dark: #121212;
+            --light: #f8f9fa;
+            --card-bg: rgba(30, 30, 30, 0.5);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -53,6 +68,7 @@
             min-height: 100vh;
             line-height: 1.6;
             background-attachment: fixed;
+            transition: all 0.3s ease;
         }
 
         h1, h2, h3 {
@@ -450,10 +466,21 @@
 
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            background: linear-gradient(90deg, 
+                var(--primary), 
+                var(--secondary), 
+                var(--success));
             border-radius: 5px;
             transition: width 0.5s ease;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            background-size: 200% 100%;
+            animation: gradient 2s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         /* Arrears section */
@@ -602,11 +629,18 @@
             text-decoration: underline;
         }
 
-        /* Floating action button */
-        .fab {
+        /* Floating action buttons */
+        .fab-container {
             position: fixed;
             bottom: 40px;
             right: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .fab {
             width: 70px;
             height: 70px;
             background: linear-gradient(45deg, var(--primary), var(--secondary));
@@ -619,7 +653,6 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
             cursor: pointer;
             transition: all 0.3s ease;
-            z-index: 100;
             border: none;
         }
 
@@ -629,26 +662,195 @@
             background: linear-gradient(45deg, var(--primary-dark), var(--secondary-dark));
         }
 
+        .fab-secondary {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, var(--success), var(--warning));
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .fab-container:hover .fab-secondary {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         /* Confetti effect */
-        .confetti {
+        .confetti-container {
             position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
             width: 12px;
             height: 12px;
-            background-color: #f00;
             opacity: 0;
-            z-index: 999;
             animation: confetti-fall 5s ease-in-out;
         }
 
         @keyframes confetti-fall {
             0% {
-                transform: translateY(-100vh) rotate(0deg);
+                transform: translateY(-10vh) rotate(0deg);
                 opacity: 1;
             }
             100% {
-                transform: translateY(100vh) rotate(720deg);
+                transform: translateY(110vh) rotate(720deg);
                 opacity: 0;
             }
+        }
+
+        /* Loading spinner */
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--secondary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Help section */
+        .help-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .help-section.show {
+            max-height: 500px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .help-toggle {
+            cursor: pointer;
+            color: var(--secondary);
+            text-align: center;
+            margin: 10px 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: rgba(0,0,0,0.8);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+            font-weight: normal;
+            backdrop-filter: blur(5px);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Export buttons */
+        .export-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .export-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-pdf {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+
+        .export-csv {
+            background: linear-gradient(45deg, #00b09b, #96c93d);
+            color: white;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         /* Responsive adjustments */
@@ -706,6 +908,11 @@
                 bottom: 30px;
                 right: 30px;
             }
+            
+            .fab-container {
+                bottom: 30px;
+                right: 30px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -741,57 +948,22 @@
             .branch-name {
                 font-size: 1rem;
             }
-        }
-
-        /* Tooltip for grade info */
-        .grade-info {
-            position: relative;
-            display: inline-block;
-            margin-left: 5px;
-            cursor: help;
-        }
-
-        .grade-info .tooltip {
-            visibility: hidden;
-            width: 200px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 10px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.9rem;
-            font-weight: normal;
-        }
-
-        .grade-info:hover .tooltip {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* Loading animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+            
+            .export-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="loading-container" id="loadingSpinner">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">
+        <i class="fas fa-moon"></i>
+    </div>
+
     <div class="container">
         <div class="header">
             <div class="logo-container">
@@ -803,6 +975,39 @@
             </div>
             <h1 id="mainTitle"> GPA & CGPA Calculator For Engineering Students</h1>
             <h2>By AJ STUDIOS</h2>
+        </div>
+
+        <div class="help-toggle" onclick="toggleHelp()">
+            <i class="fas fa-question-circle"></i> Need Help?
+        </div>
+        
+        <div class="help-section" id="helpSection">
+            <h3>How to use this calculator</h3>
+            <ol>
+                <li>Select your branch from the available options</li>
+                <li>Choose your current semester</li>
+                <li>Enter your grades for each subject</li>
+                <li>View your GPA and CGPA results</li>
+                <li>For CGPA, you can manually edit semester GPAs if needed</li>
+            </ol>
+            <h3>Grade Points</h3>
+            <ul>
+                <li>O = 10 points</li>
+                <li>A+ = 9 points</li>
+                <li>A = 8 points</li>
+                <li>B+ = 7 points</li>
+                <li>B = 6 points</li>
+                <li>C = 5 points</li>
+                <li>U = 0 points (Fail)</li>
+            </ul>
+            <div class="export-buttons">
+                <div class="export-btn export-pdf" onclick="exportToPDF()">
+                    <i class="fas fa-file-pdf"></i> Export as PDF
+                </div>
+                <div class="export-btn export-csv" onclick="exportToCSV()">
+                    <i class="fas fa-file-csv"></i> Export as CSV
+                </div>
+            </div>
         </div>
 
         <div class="form-group">
@@ -865,9 +1070,17 @@
         </div>
     </div>
 
-    <button class="fab" onclick="resetCalculator()" title="Reset Calculator">
-        <i class="fas fa-redo"></i>
-    </button>
+    <div class="fab-container">
+        <button class="fab fab-secondary" onclick="exportToPDF()" title="Export to PDF">
+            <i class="fas fa-file-pdf"></i>
+        </button>
+        <button class="fab fab-secondary" onclick="exportToCSV()" title="Export to CSV">
+            <i class="fas fa-file-csv"></i>
+        </button>
+        <button class="fab" onclick="resetCalculator()" title="Reset Calculator">
+            <i class="fas fa-redo"></i>
+        </button>
+    </div>
 
     <script>
         // Academic data structure with all branches from Sona College
@@ -1360,6 +1573,39 @@
                     loadSubjects();
                 }
             }
+            
+            // Check for saved theme preference
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+            }
+        }
+
+        // Toggle help section
+        function toggleHelp() {
+            document.getElementById('helpSection').classList.toggle('show');
+        }
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+            
+            const icon = document.getElementById('themeToggle').querySelector('i');
+            if (isDarkMode) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        }
+
+        // Show loading spinner
+        function showLoading(show) {
+            const spinner = document.getElementById('loadingSpinner');
+            spinner.style.display = show ? 'flex' : 'none';
         }
 
         // Load all available branches
@@ -1408,120 +1654,159 @@
 
         // Load subjects for selected semester
         function loadSubjects() {
-            const sem = document.getElementById("semester").value;
-            const form = document.getElementById("subjectForm");
-            form.innerHTML = "";
+            showLoading(true);
             
-            if (!sem || !currentBranch || !academicData.branches[currentBranch] || 
-                !academicData.branches[currentBranch].semesters[sem]) return;
-            
-            localStorage.setItem("lastSemester", sem);
-            
-            const semesterKey = `${currentBranch}_${sem}`;
-            if (!selectedGrades[semesterKey]) {
-                selectedGrades[semesterKey] = Array(academicData.branches[currentBranch].semesters[sem].length).fill("");
-            }
-            
-            let html = `<div class="subject-grid">`;
-            
-            academicData.branches[currentBranch].semesters[sem].forEach((sub, i) => {
-                const savedGrade = selectedGrades[semesterKey][i] || "";
-                const gradeClass = savedGrade ? `grade-${savedGrade.replace('+', 'plus')}` : '';
+            // Use setTimeout to allow UI to update before heavy DOM operations
+            setTimeout(() => {
+                const sem = document.getElementById("semester").value;
+                const form = document.getElementById("subjectForm");
+                form.innerHTML = "";
                 
-                html += `
-                    <div class="subject-card ${gradeClass}" id="card${i}">
-                        <div class="subject-header">
-                            <span class="subject-code">${sub.code}</span>
-                            <span class="subject-credits">${sub.credits} Credits</span>
-                        </div>
-                        <div class="subject-name">${sub.name}</div>
-                        <div class="subject-grade">
-                            <select id="grade${i}" onchange="updateGPA(${sem}, ${i})" class="${gradeClass}">
-                                <option value="">-- Select Grade --</option>
-                                <option value="O" ${savedGrade === "O" ? "selected" : ""}>O (10)</option>
-                                <option value="A+" ${savedGrade === "A+" ? "selected" : ""}>A+ (9)</option>
-                                <option value="A" ${savedGrade === "A" ? "selected" : ""}>A (8)</option>
-                                <option value="B+" ${savedGrade === "B+" ? "selected" : ""}>B+ (7)</option>
-                                <option value="B" ${savedGrade === "B" ? "selected" : ""}>B (6)</option>
-                                <option value="C" ${savedGrade === "C" ? "selected" : ""}>C (5)</option>
-                                <option value="U" ${savedGrade === "U" ? "selected" : ""}>U (Fail)</option>
-                            </select>
-                        </div>
-                    </div>`;
-            });
-            
-            html += `</div>`;
-            form.innerHTML = html;
+                if (!sem || !currentBranch || !academicData.branches[currentBranch] || 
+                    !academicData.branches[currentBranch].semesters[sem]) {
+                    showLoading(false);
+                    return;
+                }
+                
+                localStorage.setItem("lastSemester", sem);
+                
+                const semesterKey = `${currentBranch}_${sem}`;
+                if (!selectedGrades[semesterKey]) {
+                    selectedGrades[semesterKey] = Array(academicData.branches[currentBranch].semesters[sem].length).fill("");
+                }
+                
+                let html = `<div class="subject-grid">`;
+                
+                academicData.branches[currentBranch].semesters[sem].forEach((sub, i) => {
+                    const savedGrade = selectedGrades[semesterKey][i] || "";
+                    const gradeClass = savedGrade ? `grade-${savedGrade.replace('+', 'plus')}` : '';
+                    
+                    html += `
+                        <div class="subject-card ${gradeClass}" id="card${i}">
+                            <div class="subject-header">
+                                <span class="subject-code">${sub.code}</span>
+                                <span class="subject-credits">${sub.credits} Credits</span>
+                            </div>
+                            <div class="subject-name">${sub.name}</div>
+                            <div class="subject-grade">
+                                <select id="grade${i}" onchange="updateGPA(${sem}, ${i})" class="${gradeClass}">
+                                    <option value="">-- Select Grade --</option>
+                                    <option value="O" ${savedGrade === "O" ? "selected" : ""}>O (10)</option>
+                                    <option value="A+" ${savedGrade === "A+" ? "selected" : ""}>A+ (9)</option>
+                                    <option value="A" ${savedGrade === "A" ? "selected" : ""}>A (8)</option>
+                                    <option value="B+" ${savedGrade === "B+" ? "selected" : ""}>B+ (7)</option>
+                                    <option value="B" ${savedGrade === "B" ? "selected" : ""}>B (6)</option>
+                                    <option value="C" ${savedGrade === "C" ? "selected" : ""}>C (5)</option>
+                                    <option value="U" ${savedGrade === "U" ? "selected" : ""}>U (Fail)</option>
+                                </select>
+                            </div>
+                        </div>`;
+                });
+                
+                html += `</div>`;
+                form.innerHTML = html;
+                showLoading(false);
+                
+                // Animate the appearance of subject cards
+                const cards = document.querySelectorAll('.subject-card');
+                cards.forEach((card, index) => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = `all 0.3s ease ${index * 0.05}s`;
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 50);
+                });
+            }, 100);
         }
 
         // Update GPA calculation
         function updateGPA(sem, index) {
-            if (!currentBranch || !academicData.branches[currentBranch] || 
-                !academicData.branches[currentBranch].semesters[sem]) return;
+            showLoading(true);
             
-            const semesterKey = `${currentBranch}_${sem}`;
-            const gradeSelect = document.getElementById(`grade${index}`);
-            const grade = gradeSelect ? gradeSelect.value : "";
-            selectedGrades[semesterKey][index] = grade;
-            
-            const card = document.getElementById(`card${index}`);
-            if (card) {
-                // Remove all grade classes
-                card.className = 'subject-card';
-                gradeSelect.className = '';
-                
-                if (grade) {
-                    const gradeClass = `grade-${grade.replace('+', 'plus')}`;
-                    card.classList.add(gradeClass);
-                    gradeSelect.classList.add(gradeClass);
-                }
-            }
-            
-            localStorage.setItem("selectedGrades", JSON.stringify(selectedGrades));
-            
-            // Calculate GPA
-            let total = 0, credits = 0, hasU = false;
-            let arrearsList = [];
-            
-            academicData.branches[currentBranch].semesters[sem].forEach((sub, i) => {
-                const grade = selectedGrades[semesterKey][i] || "";
-                
-                if (grade === "U") {
-                    hasU = true;
-                    arrearsList.push({name: sub.name, index: i});
+            setTimeout(() => {
+                if (!currentBranch || !academicData.branches[currentBranch] || 
+                    !academicData.branches[currentBranch].semesters[sem]) {
+                    showLoading(false);
+                    return;
                 }
                 
-                if (grade && gradePoints[grade] !== undefined && sub.credits > 0) {
-                    total += gradePoints[grade] * sub.credits;
-                    credits += sub.credits;
+                const semesterKey = `${currentBranch}_${sem}`;
+                const gradeSelect = document.getElementById(`grade${index}`);
+                const grade = gradeSelect ? gradeSelect.value : "";
+                selectedGrades[semesterKey][index] = grade;
+                
+                const card = document.getElementById(`card${index}`);
+                if (card) {
+                    // Remove all grade classes
+                    card.className = 'subject-card';
+                    gradeSelect.className = '';
+                    
+                    if (grade) {
+                        const gradeClass = `grade-${grade.replace('+', 'plus')}`;
+                        card.classList.add(gradeClass);
+                        gradeSelect.classList.add(gradeClass);
+                    }
                 }
-            });
-            
-            const gpa = (credits > 0) ? (total / credits).toFixed(2) : 0;
-            gpaPerSem[semesterKey] = {gpa: parseFloat(gpa), credits};
-            localStorage.setItem("gpaPerSem", JSON.stringify(gpaPerSem));
-            
-            // Update GPA display
-            const gpaResult = document.getElementById("gpaResult");
-            const gpaValue = document.getElementById("gpaValue");
-            const gpaProgress = document.getElementById("gpaProgress");
-            
-            gpaResult.style.display = "flex";
-            gpaValue.textContent = gpa;
-            gpaProgress.style.width = `${(gpa / 10) * 100}%`;
-            
-            // Set result card style based on GPA
-            gpaResult.className = "result-card gpa-result";
-            if (hasU) {
-                gpaResult.classList.add("fail");
-            }
-            
-            // Update arrears list
-            updateArrears(arrearsList);
-            
-            // Update CGPA
-            updateCGPA();
-            loadCGPAInputs(); // Refresh CGPA inputs to show updated GPA
+                
+                localStorage.setItem("selectedGrades", JSON.stringify(selectedGrades));
+                
+                // Calculate GPA
+                let total = 0, credits = 0, hasU = false;
+                let arrearsList = [];
+                
+                academicData.branches[currentBranch].semesters[sem].forEach((sub, i) => {
+                    const grade = selectedGrades[semesterKey][i] || "";
+                    
+                    if (grade === "U") {
+                        hasU = true;
+                        arrearsList.push({name: sub.name, index: i});
+                    }
+                    
+                    if (grade && gradePoints[grade] !== undefined && sub.credits > 0) {
+                        total += gradePoints[grade] * sub.credits;
+                        credits += sub.credits;
+                    }
+                });
+                
+                const gpa = (credits > 0) ? (total / credits).toFixed(2) : 0;
+                gpaPerSem[semesterKey] = {gpa: parseFloat(gpa), credits};
+                localStorage.setItem("gpaPerSem", JSON.stringify(gpaPerSem));
+                
+                // Update GPA display
+                const gpaResult = document.getElementById("gpaResult");
+                const gpaValue = document.getElementById("gpaValue");
+                const gpaProgress = document.getElementById("gpaProgress");
+                
+                gpaResult.style.display = "flex";
+                gpaValue.textContent = gpa;
+                gpaProgress.style.width = `${(gpa / 10) * 100}%`;
+                
+                // Animate the result card
+                gpaResult.style.opacity = '0';
+                gpaResult.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    gpaResult.style.opacity = '1';
+                    gpaResult.style.transform = 'scale(1)';
+                }, 100);
+                
+                // Set result card style based on GPA
+                gpaResult.className = "result-card gpa-result";
+                if (hasU) {
+                    gpaResult.classList.add("fail");
+                }
+                
+                // Update arrears list
+                updateArrears(arrearsList);
+                
+                // Update CGPA
+                updateCGPA();
+                loadCGPAInputs(); // Refresh CGPA inputs to show updated GPA
+                
+                showLoading(false);
+            }, 100);
         }
 
         // Update arrears list display
@@ -1537,7 +1822,12 @@
                     </li>`
                 ).join("");
                 
-                arrearsContainer.classList.add("show");
+                // Animate the appearance
+                arrearsContainer.style.maxHeight = '0';
+                arrearsContainer.style.opacity = '0';
+                setTimeout(() => {
+                    arrearsContainer.classList.add("show");
+                }, 100);
             } else {
                 arrearsContainer.classList.remove("show");
             }
@@ -1546,17 +1836,24 @@
         // Toggle arrears visibility
         function toggleArrears() {
             const arrearsContainer = document.getElementById("arrears");
+            const chevron = arrearsContainer.querySelector('.fa-chevron-down');
+            
             arrearsContainer.classList.toggle("show");
+            chevron.classList.toggle('rotate');
         }
 
         // Highlight a specific card
         function highlightCard(index) {
             const cards = document.querySelectorAll(".subject-card");
-            cards.forEach(c => c.style.boxShadow = "");
+            cards.forEach(c => {
+                c.style.boxShadow = "";
+                c.style.transition = "all 0.3s ease";
+            });
             
             const card = document.getElementById(`card${index}`);
             if (card) {
                 card.style.boxShadow = "0 0 15px 5px rgba(255, 255, 0, 0.7)";
+                card.style.transition = "all 0.5s ease";
                 card.scrollIntoView({behavior: "smooth", block: "center"});
                 
                 // Remove highlight after 3 seconds
@@ -1596,6 +1893,20 @@
             }
             
             cgpaContainer.innerHTML = html;
+            
+            // Animate the inputs
+            const inputs = document.querySelectorAll('.semester-input');
+            inputs.forEach((input, index) => {
+                input.style.opacity = '0';
+                input.style.transform = 'translateY(20px)';
+                input.style.transition = `all 0.3s ease ${index * 0.05}s`;
+                
+                setTimeout(() => {
+                    input.style.opacity = '1';
+                    input.style.transform = 'translateY(0)';
+                }, 50);
+            });
+            
             updateCGPA();
         }
 
@@ -1606,6 +1917,13 @@
             const semesterKey = `${currentBranch}_${sem}`;
             const input = document.getElementById(`cgpaSem${sem}`);
             const value = parseFloat(input.value) || 0;
+            
+            // Validate input
+            if (value < 0 || value > 10) {
+                alert("Please enter a GPA between 0 and 10");
+                input.value = gpaPerSem[semesterKey]?.gpa.toFixed(2) || "0.00";
+                return;
+            }
             
             // Get credits for this semester (use default if not available)
             const credits = academicData.branches[currentBranch]?.semesters[sem] ? 
@@ -1648,6 +1966,14 @@
             cgpaValue.textContent = cgpa;
             cgpaProgress.style.width = `${(cgpa / 10) * 100}%`;
             
+            // Animate the result card
+            cgpaResult.style.opacity = '0';
+            cgpaResult.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                cgpaResult.style.opacity = '1';
+                cgpaResult.style.transform = 'scale(1)';
+            }, 100);
+            
             // Set result card style based on CGPA
             cgpaResult.className = "result-card cgpa-result";
             if (hasLow) {
@@ -1662,55 +1988,224 @@
         function createConfetti() {
             if (parseFloat(document.getElementById("cgpaValue").textContent) < 9) return;
             
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff9900', '#9900ff'];
+            const shapes = ['circle', 'square', 'triangle'];
             
-            for (let i = 0; i < 150; i++) {
+            // Create container if it doesn't exist
+            let container = document.querySelector('.confetti-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'confetti-container';
+                document.body.appendChild(container);
+            }
+            
+            // Clear previous confetti
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 200; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
+                
+                // Random position
                 confetti.style.left = `${Math.random() * 100}vw`;
+                
+                // Random color
                 confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.width = `${Math.random() * 10 + 5}px`;
-                confetti.style.height = `${Math.random() * 10 + 5}px`;
-                confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
                 
-                document.body.appendChild(confetti);
+                // Random size
+                const size = Math.random() * 10 + 5;
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
                 
-                // Remove confetti after animation
-                setTimeout(() => {
-                    confetti.remove();
-                }, 5000);
+                // Random shape
+                if (Math.random() > 0.7) { // 30% chance for non-square shape
+                    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                    if (shape === 'circle') {
+                        confetti.style.borderRadius = '50%';
+                    } else if (shape === 'triangle') {
+                        confetti.style.width = '0';
+                        confetti.style.height = '0';
+                        confetti.style.backgroundColor = 'transparent';
+                        confetti.style.borderLeft = `${size/2}px solid transparent`;
+                        confetti.style.borderRight = `${size/2}px solid transparent`;
+                        confetti.style.borderBottom = `${size}px solid ${colors[Math.floor(Math.random() * colors.length)]}`;
+                    }
+                }
+                
+                // Random rotation
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                // Random opacity
+                confetti.style.opacity = Math.random() * 0.7 + 0.3;
+                
+                // Random animation duration and delay
+                const duration = Math.random() * 3 + 2;
+                const delay = Math.random() * 2;
+                confetti.style.animation = `confetti-fall ${duration}s ease-in-out ${delay}s forwards`;
+                
+                container.appendChild(confetti);
             }
+            
+            // Remove container after animation completes
+            setTimeout(() => {
+                container.remove();
+            }, 7000);
+        }
+
+        // Export to PDF
+        function exportToPDF() {
+            showLoading(true);
+            
+            setTimeout(() => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Get current date for filename
+                const today = new Date();
+                const dateStr = today.toISOString().split('T')[0];
+                
+                // Get branch name for filename
+                const branchName = currentBranch ? academicData.branches[currentBranch].name.replace(/ /g, '_') : 'Results';
+                
+                // Capture the main container
+                html2canvas(document.querySelector('.container')).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = 210; // A4 width in mm
+                    const pageHeight = 295; // A4 height in mm
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 0;
+                    
+                    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                    
+                    // Add new pages if content is longer than one page
+                    while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight;
+                        doc.addPage();
+                        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                    }
+                    
+                    doc.save(`${branchName}_GPA_Results_${dateStr}.pdf`);
+                    showLoading(false);
+                });
+            }, 500);
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            showLoading(true);
+            
+            setTimeout(() => {
+                if (!currentBranch) {
+                    alert("Please select a branch first");
+                    showLoading(false);
+                    return;
+                }
+                
+                const today = new Date();
+                const dateStr = today.toISOString().split('T')[0];
+                const branchName = academicData.branches[currentBranch].name.replace(/ /g, '_');
+                
+                let csvContent = "data:text/csv;charset=utf-8,";
+                
+                // Add header
+                csvContent += "Semester,Subject Code,Subject Name,Credits,Grade,Grade Points\n";
+                
+                // Add subject data
+                for (let sem = 1; sem <= 8; sem++) {
+                    const semesterKey = `${currentBranch}_${sem}`;
+                    const semesterData = academicData.branches[currentBranch].semesters[sem];
+                    
+                    if (semesterData) {
+                        semesterData.forEach((sub, i) => {
+                            const grade = selectedGrades[semesterKey] ? selectedGrades[semesterKey][i] || "" : "";
+                            const gradePoint = grade ? gradePoints[grade] : "";
+                            
+                            csvContent += `${sem},${sub.code},"${sub.name}",${sub.credits},${grade},${gradePoint}\n`;
+                        });
+                    }
+                }
+                
+                // Add GPA/CGPA summary
+                csvContent += "\nSummary\n";
+                csvContent += "Semester,GPA,Credits\n";
+                
+                for (let sem = 1; sem <= 8; sem++) {
+                    const semesterKey = `${currentBranch}_${sem}`;
+                    const semData = gpaPerSem[semesterKey];
+                    
+                    if (semData) {
+                        csvContent += `${sem},${semData.gpa.toFixed(2)},${semData.credits}\n`;
+                    }
+                }
+                
+                // Calculate total CGPA
+                let totalWeightedGPA = 0, totalCredits = 0;
+                for (let sem = 1; sem <= 8; sem++) {
+                    const semesterKey = `${currentBranch}_${sem}`;
+                    const data = gpaPerSem[semesterKey];
+                    if (data && data.gpa > 0) {
+                        totalWeightedGPA += data.gpa * data.credits;
+                        totalCredits += data.credits;
+                    }
+                }
+                
+                const cgpa = totalCredits > 0 ? (totalWeightedGPA / totalCredits).toFixed(2) : 0;
+                csvContent += `\nOverall CGPA,${cgpa},Total Credits,${totalCredits}\n`;
+                
+                // Create download link
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `${branchName}_GPA_Results_${dateStr}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showLoading(false);
+            }, 500);
         }
 
         // Reset calculator
         function resetCalculator() {
             if (confirm("Are you sure you want to reset all data?")) {
-                selectedGrades = {};
-                gpaPerSem = {};
-                localStorage.removeItem("selectedGrades");
-                localStorage.removeItem("gpaPerSem");
-                localStorage.removeItem("lastBranch");
-                localStorage.removeItem("lastSemester");
+                showLoading(true);
                 
-                currentBranch = "";
-                document.getElementById("branchSelection").innerHTML = "";
-                document.getElementById("semesterGroup").style.display = "none";
-                document.getElementById("semester").value = "";
-                document.getElementById("subjectForm").innerHTML = "";
-                document.getElementById("gpaResult").style.display = "none";
-                document.getElementById("arrears").classList.remove("show");
-                document.getElementById("mainTitle").textContent = "Engineering GPA & CGPA Calculator";
-                
-                loadBranches();                loadCGPAInputs();
-                updateCGPA();
-                
-                // Show notification
-                alert("Calculator has been reset successfully!");
+                setTimeout(() => {
+                    selectedGrades = {};
+                    gpaPerSem = {};
+                    localStorage.removeItem("selectedGrades");
+                    localStorage.removeItem("gpaPerSem");
+                    localStorage.removeItem("lastBranch");
+                    localStorage.removeItem("lastSemester");
+                    
+                    currentBranch = "";
+                    document.getElementById("branchSelection").innerHTML = "";
+                    document.getElementById("semesterGroup").style.display = "none";
+                    document.getElementById("semester").value = "";
+                    document.getElementById("subjectForm").innerHTML = "";
+                    document.getElementById("gpaResult").style.display = "none";
+                    document.getElementById("arrears").classList.remove("show");
+                    document.getElementById("mainTitle").textContent = "Engineering GPA & CGPA Calculator";
+                    
+                    loadBranches();
+                    loadCGPAInputs();
+                    updateCGPA();
+                    
+                    // Show notification
+                    alert("Calculator has been reset successfully!");
+                    showLoading(false);
+                }, 500);
             }
         }
 
         // Initialize when page loads
         window.onload = init;
+        
+        // Add event listeners
+        document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
     </script>
 </body>
 </html>
